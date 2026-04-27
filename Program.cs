@@ -3,10 +3,16 @@ using Microsoft.AspNetCore.Identity;
 
 using FleetFactory.Infrastructure.Persistence;
 using FleetFactory.Infrastructure.Identity; 
+using FleetFactory.Infrastructure.Services;
+using FleetFactory.Application.Interfaces.Services;
 
-
+//middleware
+using FleetFactory.API.Middleware;
 //seeders 
 using FleetFactory.Infrastructure.Seeders;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +30,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
+//configure DI for the services 
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 //application user setup for identity
 builder.Services
@@ -31,7 +40,37 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+//validate JWT tokens for authentication
+builder.Services.AddAuthentication(
+    options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }).AddJwtBearer(
+        options =>
+        {
+            var jwt = builder.Configuration.GetSection("Jwt");
+
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwt["Issuer"],
+
+                ValidateAudience = true,
+                ValidAudience = jwt["Audience"],
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwt["Key"]!)
+                ),
+
+                ValidateLifetime = true
+            };
+        }
+    );
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -39,10 +78,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
 
+//scheme means auth types, we will use JWT for our API
+//challenge -> if fails respond with rules of JWT
 app.UseAuthentication();
+   
 app.UseAuthorization();
+
 
 app.MapControllers();
 
