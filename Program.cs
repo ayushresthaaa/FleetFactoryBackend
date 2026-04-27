@@ -61,7 +61,7 @@ builder.Services.AddAuthentication(
 
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwt["Key"]!)
+                    Encoding.UTF8.GetBytes(jwt["SecretKey"]!)
                 ),
 
                 ValidateLifetime = true

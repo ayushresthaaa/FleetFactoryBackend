@@ -7,3 +7,4 @@ namespace FleetFactory.Application.Features.Auth.DTOs
         public string Role { get; set; } = null!;
     }
 }
+
