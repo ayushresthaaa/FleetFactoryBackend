@@ -8,7 +8,7 @@ namespace FleetFactory.Infrastructure.Seeders
     {
          public static async Task SeedAsync(RoleManager<IdentityRole> roleManager)
         {
-            string[] roleNames = { "Admin", "Manager", "Staff" };
+            string[] roleNames = { "Admin", "Customer", "Staff" };
 
             foreach(var roleName in roleNames)
             {

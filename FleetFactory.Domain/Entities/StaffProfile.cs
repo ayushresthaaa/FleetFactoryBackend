@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using FleetFactory.Infrastructure.Identity;
 
 namespace FleetFactory.Domain.Entities
 {
@@ -9,7 +7,6 @@ namespace FleetFactory.Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        //fk for application user
         [Required]
         public string UserId { get; set; } = null!;
 
@@ -26,8 +23,6 @@ namespace FleetFactory.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation
-        [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; } = null!;
+        //keeping navigation to user would violate clean architecture 
     }
 }
