@@ -80,5 +80,10 @@ namespace FleetFactory.Infrastructure.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+          public async Task AddStockMovementAsync(StockMovement stockMovement)
+        {
+            await _context.StockMovements.AddAsync(stockMovement);
+        }
     }
 }
