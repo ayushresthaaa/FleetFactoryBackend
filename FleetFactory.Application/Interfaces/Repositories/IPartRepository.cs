@@ -7,14 +7,14 @@ namespace FleetFactory.Application.Interfaces.Repositories
         Task<List<Part>> GetAllAsync();
 
         Task<(List<Part> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
-        
+
         Task<Part?> GetByIdAsync(Guid id);
         Task<Part?> GetBySkuAsync(string sku);
 
         Task AddAsync(Part part);
         void Update(Part part);
         void Delete(Part part);
-
+        Task AddStockMovementAsync(StockMovement stockMovement); 
         Task<bool> ExistsBySkuAsync(string sku);
         Task<bool> ExistsBySkuExceptIdAsync(string sku, Guid id);
 
