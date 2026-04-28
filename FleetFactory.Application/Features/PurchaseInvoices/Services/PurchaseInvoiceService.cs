@@ -101,13 +101,13 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
             };
 
             decimal totalAmount = 0;
-
             foreach (var item in request.Items)
             {
                 var part = await _partRepository.GetByIdAsync(item.PartId);
 
                 if (part == null)
-                    return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse($"Part not found: {item.PartId}");
+                    return ApiResponse<PurchaseInvoiceResponseDto>
+                        .ErrorResponse($"Part not found: {item.PartId}");
 
                 totalAmount += item.Quantity * item.UnitCost;
 
@@ -117,22 +117,6 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                     Quantity = item.Quantity,
                     UnitCost = item.UnitCost
                 });
-
-                part.StockQty += item.Quantity;
-                part.UpdatedAt = DateTimeHelper.UtcNow;
-
-                part.StockMovements.Add(new StockMovement
-                {
-                    PartId = part.Id,
-                    MovementType = StockMovementType.Purchase,
-                    Quantity = item.Quantity,
-                    ReferenceId = invoice.Id,
-                    Note = $"Stock added from purchase invoice {request.InvoiceNo}",
-                    CreatedById = createdById,
-                    CreatedAt = DateTimeHelper.UtcNow
-                });
-
-                _partRepository.Update(part);
             }
 
             invoice.TotalAmount = totalAmount;
@@ -170,7 +154,10 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
 
                 if (invoice == null)
                     return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse("Purchase invoice not found");
-
+                if (invoice.Status != InvoiceStatus.Received)
+                    return ApiResponse<PurchaseInvoiceResponseDto>
+                        .ErrorResponse("Only received invoices can be marked as paid");
+                        
                 invoice.Status = InvoiceStatus.Paid;
                 invoice.PaidAt = DateTimeHelper.UtcNow;
                 invoice.UpdatedAt = DateTimeHelper.UtcNow;
@@ -201,6 +188,47 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                 return ApiResponse<PurchaseInvoiceResponseDto>
                     .SuccessResponse(response, "Purchase invoice status updated successfully");
             }
+            public async Task<ApiResponse<PurchaseInvoiceResponseDto>> ReceiveAsync(Guid id, string receivedById)
+            {
+                var invoice = await _purchaseInvoiceRepository.GetByIdAsync(id);
 
+                if (invoice == null)
+                    return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse("Purchase invoice not found");
+
+                if (invoice.Status != InvoiceStatus.Pending)
+                    return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse("Only pending invoices can be received");
+
+                foreach (var item in invoice.Items)
+                {
+                    var part = await _partRepository.GetByIdAsync(item.PartId);
+
+                    if (part == null)
+                        return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse($"Part not found: {item.PartId}");
+
+                    part.StockQty += item.Quantity;
+                    part.UpdatedAt = DateTimeHelper.UtcNow;
+
+                    await _partRepository.AddStockMovementAsync(new StockMovement
+                    {
+                        PartId = part.Id,
+                        MovementType = StockMovementType.Purchase,
+                        Quantity = item.Quantity,
+                        ReferenceId = invoice.Id,
+                        Note = $"Stock received from purchase invoice {invoice.InvoiceNo}",
+                        CreatedById = receivedById,
+                        CreatedAt = DateTimeHelper.UtcNow
+                    });
+
+                    _partRepository.Update(part);
+                }
+
+                invoice.Status = InvoiceStatus.Received;
+                invoice.UpdatedAt = DateTimeHelper.UtcNow;
+
+                _purchaseInvoiceRepository.Update(invoice);
+                await _purchaseInvoiceRepository.SaveChangesAsync();
+
+                return await GetByIdAsync(id);
+            }
     }
 }

@@ -36,7 +36,7 @@ namespace FleetFactory.API.Controllers
            var createdById = User.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? User.FindFirstValue("sub")
                 ?? "a486b986-cf38-4280-a1f2-3994477915cb"; 
-                
+
             var result = await _purchaseInvoiceService.CreateAsync(request, createdById);
 
             if (!result.Success)
@@ -52,6 +52,21 @@ namespace FleetFactory.API.Controllers
 
             if (!result.Success)
                 return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpPatch("{id:guid}/receive")]
+        public async Task<IActionResult> Receive(Guid id)
+        {
+            var receivedById = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub")
+                ?? "a486b986-cf38-4280-a1f2-3994477915cb";
+
+            var result = await _purchaseInvoiceService.ReceiveAsync(id, receivedById);
+
+            if (!result.Success)
+                return BadRequest(result);
 
             return Ok(result);
         }

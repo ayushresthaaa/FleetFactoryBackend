@@ -20,5 +20,7 @@ namespace FleetFactory.Application.Interfaces.Services
         // change status can be paid, cancelled, etc. but for now we will only implement mark as paid
         Task<ApiResponse<PurchaseInvoiceResponseDto>> 
             StatusUpdateAsync(Guid id);
+
+        Task<ApiResponse<PurchaseInvoiceResponseDto>> ReceiveAsync(Guid id, string receivedById);
     }
 }

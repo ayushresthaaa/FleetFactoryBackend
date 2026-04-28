@@ -15,5 +15,7 @@ namespace FleetFactory.Application.Interfaces.Repositories
         void Update(PurchaseInvoice invoice);
     
         Task SaveChangesAsync();
+
+        //addded because stock movements are created as part of purchase invoice processing, so we can save them in the same transaction
     }
 }
