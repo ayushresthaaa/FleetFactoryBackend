@@ -111,7 +111,9 @@ namespace FleetFactory.Application.Features.Staff.Services
                 FullName = request.FullName,
                 Phone = request.Phone,
                 Address = request.Address,
-                HiredAt = request.HiredAt,
+                HiredAt = request.HiredAt.HasValue
+                        ? DateTime.SpecifyKind(request.HiredAt.Value, DateTimeKind.Utc)
+                        : null,
                 CreatedAt = DateTimeHelper.UtcNow,
                 UpdatedAt = DateTimeHelper.UtcNow
             };
@@ -151,7 +153,9 @@ namespace FleetFactory.Application.Features.Staff.Services
             staff.FullName = request.FullName;
             staff.Phone = request.Phone;
             staff.Address = request.Address;
-            staff.HiredAt = request.HiredAt;
+            staff.HiredAt = request.HiredAt.HasValue
+                ? DateTime.SpecifyKind(request.HiredAt.Value, DateTimeKind.Utc)
+                : null;
             staff.UpdatedAt = DateTimeHelper.UtcNow;
 
             // update user active state

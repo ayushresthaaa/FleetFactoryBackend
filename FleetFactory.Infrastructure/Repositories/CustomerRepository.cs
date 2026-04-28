@@ -57,5 +57,16 @@ namespace FleetFactory.Infrastructure.Repositories
         {
             await _context.Vehicles.AddAsync(vehicle);
         }
+
+        //rachina part
+        public async Task<CustomerProfile?> GetWithHistoryAsync(Guid id)
+        {
+            return await _context.CustomerProfiles
+                .Include(c => c.Vehicles)
+                .Include(c => c.SalesInvoices)
+                    .ThenInclude(s => s.Items)
+                        .ThenInclude(i => i.Part)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
     }
 }

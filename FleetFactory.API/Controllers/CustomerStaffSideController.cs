@@ -52,5 +52,17 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+        //added by rachina
+        [HttpGet("{id:guid}/history")]
+        public async Task<IActionResult> GetCustomerHistory(Guid id)
+        {
+            var result = await _customerService.GetCustomerHistoryAsync(id);
+
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
+        }
     }
 }

@@ -10,6 +10,8 @@ namespace FleetFactory.Application.Interfaces.Repositories
         void Update(CustomerProfile customer);
         Task SaveChangesAsync();
         Task AddVehicleAsync(Vehicle vehicle);
-   
+
+        //added by rachina
+        Task<CustomerProfile?> GetWithHistoryAsync(Guid id);
     }
 }

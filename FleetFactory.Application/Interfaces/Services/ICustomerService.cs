@@ -12,5 +12,10 @@ namespace FleetFactory.Application.Interfaces.Services
         Task<ApiResponse<CustomerResponseDto>> GetByIdAsync(Guid id);
 
         Task<ApiResponse<CustomerResponseDto>> AddVehicleAsync(Guid customerId, AddVehicleRequestDto request);
+
+        //added by rachina
+
+        Task<ApiResponse<CustomerHistoryResponseDTO>> 
+            GetCustomerHistoryAsync(Guid customerId);
     }
 }

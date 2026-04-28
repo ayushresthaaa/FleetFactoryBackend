@@ -168,5 +168,51 @@ namespace FleetFactory.Application.Features.Customers.Services
 
             return await GetByIdAsync(customerId);
         }
+
+
+        //rachina part
+        public async Task<ApiResponse<CustomerHistoryResponseDTO>> GetCustomerHistoryAsync(Guid customerId)
+        {
+            var customer = await _customerRepository.GetWithHistoryAsync(customerId);
+
+            if (customer == null)
+                return ApiResponse<CustomerHistoryResponseDTO>.ErrorResponse("Customer not found");
+
+            var response = new CustomerHistoryResponseDTO
+            {
+                CustomerId = customer.Id,
+                UserId = customer.UserId,
+                FullName = customer.FullName,
+                Phone = customer.Phone,
+                Address = customer.Address,
+                CreditBalance = customer.CreditBalance,
+
+                Vehicles = customer.Vehicles.Select(v => new VehicleResponseDto
+                {
+                    Id = v.Id,
+                    VehicleNumber = v.VehicleNumber,
+                    Make = v.Make,
+                    Model = v.Model,
+                    Year = v.Year
+                }).ToList(),
+
+                PurchaseHistory = customer.SalesInvoices.Select(s => new CustomerSalesInvoiceHistoryDTO
+                {
+                    SalesInvoiceId = s.Id,
+                    InvoiceNo = s.InvoiceNo,
+                    Status = s.Status,
+                    Subtotal = s.Subtotal,
+                    DiscountPct = s.DiscountPct,
+                    TotalAmount = s.TotalAmount,
+                    CreatedAt = s.CreatedAt
+                }).ToList()
+            };
+
+            return ApiResponse<CustomerHistoryResponseDTO>
+                .SuccessResponse(response, "Customer history retrieved successfully");
+        }
     }
+
+    //rachina history part 
+    
 }
