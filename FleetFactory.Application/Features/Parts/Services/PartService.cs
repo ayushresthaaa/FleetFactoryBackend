@@ -3,7 +3,7 @@ using FleetFactory.Application.Interfaces.Repositories;
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Domain.Entities;
 using FleetFactory.Shared.Results;
-
+using FleetFactory.Infrastructure.Helpers; 
 namespace FleetFactory.Application.Features.Parts.Services
 {
     public class PartService(IPartRepository _partRepository) : IPartService
@@ -86,8 +86,8 @@ namespace FleetFactory.Application.Features.Parts.Services
                 CategoryId = request.CategoryId,
                 VendorId = request.VendorId,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = DateTimeHelper.UtcNow,
+                UpdatedAt = DateTimeHelper.UtcNow
             };
 
             await _partRepository.AddAsync(part);
@@ -130,7 +130,7 @@ namespace FleetFactory.Application.Features.Parts.Services
             part.VendorId = request.VendorId;
 
             part.IsActive = request.IsActive;
-            part.UpdatedAt = DateTime.UtcNow;
+            part.UpdatedAt = DateTimeHelper.UtcNow;
 
             _partRepository.Update(part);
             await _partRepository.SaveChangesAsync();
