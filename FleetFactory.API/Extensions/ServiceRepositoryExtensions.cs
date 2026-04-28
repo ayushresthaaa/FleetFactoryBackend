@@ -8,7 +8,7 @@ using FleetFactory.Application.Features.Parts.Services;
 using FleetFactory.Application.Features.PurchaseInvoices.Services;
 using FleetFactory.Application.Features.Vendors.Services;
 using FleetFactory.Application.Features.Customers.Services;
-
+using FleetFactory.Application.Features.Staff.Services;
 
 namespace FleetFactory.API.Extensions
 {
@@ -26,11 +26,14 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
             services.AddScoped<IVendorService, VendorService>();
             services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<IStaffService, StaffService>();
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
             services.AddScoped<IVendorRepository, VendorRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IStaffRepository, StaffRepository>();
+            
             return services;
         }
     }
