@@ -5,8 +5,8 @@ using FleetFactory.Infrastructure.Services;
 
 //import custom services and repositories for DI registration
 using FleetFactory.Application.Features.Parts.Services; 
-
-
+using FleetFactory.Application.Features.PurchaseInvoices.Services;
+using FleetFactory.Application.Features.Vendors.Services;
 
 namespace FleetFactory.API.Extensions
 {
@@ -21,11 +21,12 @@ namespace FleetFactory.API.Extensions
 
             //business logic services
             services.AddScoped<IPartService, PartService>();
-
+            services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
+            services.AddScoped<IVendorService, VendorService>();
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
-            
+            services.AddScoped<IVendorRepository, VendorRepository>();
             return services;
         }
     }
