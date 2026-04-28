@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 using FleetFactory.Infrastructure.Persistence;
 using FleetFactory.Infrastructure.Identity; 
-using FleetFactory.Infrastructure.Services;
-using FleetFactory.Application.Interfaces.Services;
+
+//register services and repositories
+using FleetFactory.API.Extensions;
 
 //middleware
 using FleetFactory.API.Middleware;
@@ -30,10 +32,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
-//configure DI for the services 
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICacheService, CacheService>();
+//configure DI for the services registration
+builder.Services.AddProjectServicesAndRepositories();
+
 
 //application user setup for identity
 builder.Services
@@ -65,7 +66,9 @@ builder.Services.AddAuthentication(
                     Encoding.UTF8.GetBytes(jwt["SecretKey"]!)
                 ),
 
-                ValidateLifetime = true
+                ValidateLifetime = true,
+
+                RoleClaimType = ClaimTypes.Role,
             };
         }
     );
