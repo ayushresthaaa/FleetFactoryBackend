@@ -4,7 +4,7 @@ using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Domain.Entities;
 using FleetFactory.Domain.Enums;
 using FleetFactory.Shared.Results;
-
+using FleetFactory.Infrastructure.Helpers;
 namespace FleetFactory.Application.Features.PurchaseInvoices.Services
 {
     public class PurchaseInvoiceService(IPurchaseInvoiceRepository _purchaseInvoiceRepository, IPartRepository _partRepository): IPurchaseInvoiceService { 
@@ -96,8 +96,8 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                 InvoiceNo = request.InvoiceNo.Trim(),
                 CreatedById = createdById,
                 Status = InvoiceStatus.Pending,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = DateTimeHelper.UtcNow,
+                UpdatedAt = DateTimeHelper.UtcNow
             };
 
             decimal totalAmount = 0;
@@ -119,7 +119,7 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                 });
 
                 part.StockQty += item.Quantity;
-                part.UpdatedAt = DateTime.UtcNow;
+                part.UpdatedAt = DateTimeHelper.UtcNow;
 
                 part.StockMovements.Add(new StockMovement
                 {
@@ -129,7 +129,7 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                     ReferenceId = invoice.Id,
                     Note = $"Stock added from purchase invoice {request.InvoiceNo}",
                     CreatedById = createdById,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTimeHelper.UtcNow
                 });
 
                 _partRepository.Update(part);
@@ -172,8 +172,8 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                     return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse("Purchase invoice not found");
 
                 invoice.Status = InvoiceStatus.Paid;
-                invoice.PaidAt = DateTime.UtcNow;
-                invoice.UpdatedAt = DateTime.UtcNow;
+                invoice.PaidAt = DateTimeHelper.UtcNow;
+                invoice.UpdatedAt = DateTimeHelper.UtcNow;
 
                 _purchaseInvoiceRepository.Update(invoice);
                 await _purchaseInvoiceRepository.SaveChangesAsync();
