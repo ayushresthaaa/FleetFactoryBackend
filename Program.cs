@@ -23,7 +23,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddMemoryCache();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
@@ -33,6 +33,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //configure DI for the services 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 //application user setup for identity
 builder.Services
