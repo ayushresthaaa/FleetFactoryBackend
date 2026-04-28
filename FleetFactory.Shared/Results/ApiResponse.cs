@@ -7,8 +7,9 @@ namespace FleetFactory.Shared.Results
         public T? Data { get; set; }
 
         //use for successful responses
+        //ApiResponse<LoginResponseDto>.SuccessResponse(loginResponse, "Login succesfful")
         public static ApiResponse<T> SuccessResponse(T data, string message = "Success")
-        {
+        {   
             return new ApiResponse<T>
             {
                 Success = true,
