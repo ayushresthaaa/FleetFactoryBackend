@@ -10,6 +10,7 @@ using FleetFactory.Application.Features.Vendors.Services;
 using FleetFactory.Application.Features.Customers.Services;
 using FleetFactory.Application.Features.Staff.Services;
 using FleetFactory.Application.Features.CustomerSide.Services;
+using FleetFactory.Application.Features.LowStock.Services;
 namespace FleetFactory.API.Extensions
 {
     public static class ServiceRepositoryExtensions
@@ -28,6 +29,7 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<ICustomerSideService, CustomerSideService>();
+            services.AddScoped<ILowStockService, LowStockService>();
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
@@ -35,6 +37,7 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IStaffRepository, StaffRepository>();
             services.AddScoped<ICustomerSideRepository, CustomerSideRepository>();
+            services.AddScoped<ILowStockRepository, LowStockRepository>();
             return services;
         }
     }
