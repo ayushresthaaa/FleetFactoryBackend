@@ -64,5 +64,18 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+        //rabison part
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var result = await _customerService.SearchAsync(query);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
+    
 }

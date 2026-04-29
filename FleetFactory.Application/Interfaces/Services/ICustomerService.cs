@@ -17,5 +17,8 @@ namespace FleetFactory.Application.Interfaces.Services
 
         Task<ApiResponse<CustomerHistoryResponseDTO>> 
             GetCustomerHistoryAsync(Guid customerId);
+
+        //rabison part
+        Task<ApiResponse<List<CustomerSearchResponseDto>>> SearchAsync(string query);
     }
 }
