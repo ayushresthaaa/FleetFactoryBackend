@@ -7,6 +7,7 @@ using FleetFactory.Infrastructure.Identity;
 
 //register services and repositories
 using FleetFactory.API.Extensions;
+using FleetFactory.Infrastructure.Services; // for cache service and low stock
 
 //middleware
 using FleetFactory.API.Middleware;
@@ -72,6 +73,8 @@ builder.Services.AddAuthentication(
             };
         }
     );
+//hosted service means it will run in the background and check for low stock every hour and send notifications to the users
+builder.Services.AddHostedService<LowStockBackgroundService>();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
