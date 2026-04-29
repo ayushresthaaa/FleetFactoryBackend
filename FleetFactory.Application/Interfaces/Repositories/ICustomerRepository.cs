@@ -13,5 +13,8 @@ namespace FleetFactory.Application.Interfaces.Repositories
 
         //added by rachina
         Task<CustomerProfile?> GetWithHistoryAsync(Guid id);
+
+        //rabison part
+        Task<List<CustomerProfile>> SearchAsync(string query);
     }
 }

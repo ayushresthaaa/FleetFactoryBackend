@@ -68,5 +68,24 @@ namespace FleetFactory.Infrastructure.Repositories
                         .ThenInclude(i => i.Part)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
+
+
+        //rabison part
+        public async Task<List<CustomerProfile>> SearchAsync(string query)
+        {
+            query = query.Trim().ToLower();
+
+            return await _context.CustomerProfiles
+                .Include(c => c.Vehicles)
+                .Where(c =>
+                    c.FullName.ToLower().Contains(query) ||
+                    (c.Phone != null && c.Phone.ToLower().Contains(query)) ||
+                    c.Id.ToString().ToLower().Contains(query) ||
+                    c.UserId.ToLower().Contains(query) ||
+                    c.Vehicles.Any(v => v.VehicleNumber.ToLower().Contains(query))
+                )
+                .OrderBy(c => c.FullName)
+                .ToListAsync();
+        }
     }
 }
