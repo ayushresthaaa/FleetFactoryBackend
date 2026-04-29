@@ -7,7 +7,11 @@ using FleetFactory.Infrastructure.Services;
 using FleetFactory.Application.Features.Parts.Services; 
 using FleetFactory.Application.Features.PurchaseInvoices.Services;
 using FleetFactory.Application.Features.Vendors.Services;
-
+using FleetFactory.Application.Features.Customers.Services;
+using FleetFactory.Application.Features.Staff.Services;
+using FleetFactory.Application.Features.CustomerSide.Services;
+using FleetFactory.Application.Features.LowStock.Services;
+using FleetFactory.Application.Features.Reports.Services;
 namespace FleetFactory.API.Extensions
 {
     public static class ServiceRepositoryExtensions
@@ -23,10 +27,20 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<IPartService, PartService>();
             services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
             services.AddScoped<IVendorService, VendorService>();
+            services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<ICustomerSideService, CustomerSideService>();
+            services.AddScoped<ILowStockService, LowStockService>();
+            services.AddScoped<IReportService, ReportService>();
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
             services.AddScoped<IVendorRepository, VendorRepository>();
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IStaffRepository, StaffRepository>();
+            services.AddScoped<ICustomerSideRepository, CustomerSideRepository>();
+            services.AddScoped<ILowStockRepository, LowStockRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
             return services;
         }
     }
