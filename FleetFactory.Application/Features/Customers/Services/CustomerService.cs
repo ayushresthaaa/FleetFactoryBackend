@@ -211,8 +211,38 @@ namespace FleetFactory.Application.Features.Customers.Services
             return ApiResponse<CustomerHistoryResponseDTO>
                 .SuccessResponse(response, "Customer history retrieved successfully");
         }
+
+        //rabison part
+        public async Task<ApiResponse<List<CustomerSearchResponseDto>>> SearchAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return ApiResponse<List<CustomerSearchResponseDto>>
+                    .ErrorResponse("Search query is required");
+
+            var customers = await _customerRepository.SearchAsync(query);
+
+            var response = customers.Select(c => new CustomerSearchResponseDto
+            {
+                CustomerId = c.Id,
+                UserId = c.UserId,
+                FullName = c.FullName,
+                Phone = c.Phone,
+                Address = c.Address,
+                Vehicles = c.Vehicles.Select(v => new VehicleResponseDto
+                {
+                    Id = v.Id,
+                    VehicleNumber = v.VehicleNumber,
+                    Make = v.Make,
+                    Model = v.Model,
+                    Year = v.Year
+                }).ToList()
+            }).ToList();
+
+            return ApiResponse<List<CustomerSearchResponseDto>>
+                .SuccessResponse(response, "Customers searched successfully");
+        }
     }
 
-    //rachina history part 
+    
     
 }
