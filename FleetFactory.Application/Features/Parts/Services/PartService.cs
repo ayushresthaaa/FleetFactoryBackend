@@ -73,8 +73,14 @@ namespace FleetFactory.Application.Features.Parts.Services
             
         }
 
-         public async Task<ApiResponse<PartResponseDto>> CreateAsync(CreatePartRequestDto request)
+        public async Task<ApiResponse<PartResponseDto>> CreateAsync(CreatePartRequestDto request)
         {
+
+            var skuExists = await _partRepository.ExistsBySkuAsync(request.Sku);
+
+            if (skuExists)
+                return ApiResponse<PartResponseDto>
+                    .ErrorResponse("SKU already exists");
             var part = new Part
             {
                 Sku = request.Sku,
@@ -119,7 +125,13 @@ namespace FleetFactory.Application.Features.Parts.Services
 
             if (part == null)
                 return ApiResponse<PartResponseDto>.ErrorResponse("Part not found");
+            var skuExists = await _partRepository
+                .ExistsBySkuExceptIdAsync(request.Sku, id);
 
+            if (skuExists)
+                return ApiResponse<PartResponseDto>
+                    .ErrorResponse("SKU already exists");
+                    
             part.Sku = request.Sku;
             part.Name = request.Name;
             part.Description = request.Description;
@@ -164,6 +176,128 @@ namespace FleetFactory.Application.Features.Parts.Services
             await _partRepository.SaveChangesAsync();
 
             return ApiResponse<string>.SuccessResponse("Deleted", "Part deleted");
+        }
+
+        public async Task<ApiResponse<List<PartResponseDto>>> GetLowStockAsync(int threshold)
+        {
+            threshold = threshold < 1 ? 10 : threshold;
+
+            var parts = await _partRepository.GetLowStockAsync(threshold);
+
+            var response = parts.Select(p => new PartResponseDto
+            {
+                Id = p.Id,
+                Sku = p.Sku,
+                Name = p.Name,
+                Description = p.Description,
+                UnitPrice = p.UnitPrice,
+                CostPrice = p.CostPrice,
+                StockQty = p.StockQty,
+                IsActive = p.IsActive,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category?.Name,
+                VendorId = p.VendorId,
+                VendorName = p.Vendor?.Name,
+                CreatedAt = p.CreatedAt
+            }).ToList();
+
+            return ApiResponse<List<PartResponseDto>>
+                .SuccessResponse(response, "Low stock parts retrieved");
+        }
+
+
+        public async Task<ApiResponse<List<PartResponseDto>>> GetAvailableAsync()
+        {
+            var parts = await _partRepository.GetAvailableAsync();
+
+            var response = parts.Select(p => new PartResponseDto
+            {
+                Id = p.Id,
+                Sku = p.Sku,
+                Name = p.Name,
+                Description = p.Description,
+                UnitPrice = p.UnitPrice,
+                CostPrice = p.CostPrice,
+                StockQty = p.StockQty,
+                IsActive = p.IsActive,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category?.Name,
+                VendorId = p.VendorId,
+                VendorName = p.Vendor?.Name,
+                CreatedAt = p.CreatedAt
+            }).ToList();
+
+            return ApiResponse<List<PartResponseDto>>
+                .SuccessResponse(response, "Available parts retrieved");
+        }
+
+        public async Task<ApiResponse<List<StockMovementResponseDto>>> GetStockMovementsAsync(Guid partId)
+        {
+            var part = await _partRepository.GetByIdAsync(partId);
+
+            if (part == null)
+                return ApiResponse<List<StockMovementResponseDto>>
+                    .ErrorResponse("Part not found");
+
+            var movements = await _partRepository.GetStockMovementsAsync(partId);
+
+            var response = movements.Select(m => new StockMovementResponseDto
+            {
+                Id = m.Id,
+                PartId = m.PartId,
+                PartName = m.Part?.Name,
+                MovementType = m.MovementType,
+                Quantity = m.Quantity,
+                ReferenceId = m.ReferenceId,
+                Note = m.Note,
+                CreatedById = m.CreatedById,
+                CreatedAt = m.CreatedAt
+            }).ToList();
+
+            return ApiResponse<List<StockMovementResponseDto>>
+                .SuccessResponse(response, "Stock movements retrieved");
+        }
+
+        public async Task<ApiResponse<PagedResult<PartResponseDto>>> SearchAsync(
+            string keyword,
+            int pageNumber,
+            int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return ApiResponse<PagedResult<PartResponseDto>>
+                    .ErrorResponse("Keyword is required");
+
+            var (parts, totalCount) = await _partRepository.SearchAsync(
+                keyword,
+                pageNumber,
+                pageSize);
+
+            var response = parts.Select(p => new PartResponseDto
+            {
+                Id = p.Id,
+                Sku = p.Sku,
+                Name = p.Name,
+                Description = p.Description,
+                UnitPrice = p.UnitPrice,
+                CostPrice = p.CostPrice,
+                StockQty = p.StockQty,
+                IsActive = p.IsActive,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category?.Name,
+                VendorId = p.VendorId,
+                VendorName = p.Vendor?.Name,
+                CreatedAt = p.CreatedAt
+            }).ToList();
+
+            var pagedResult = PagedResult<PartResponseDto>.Create(
+                response,
+                pageNumber,
+                pageSize,
+                totalCount
+            );
+
+            return ApiResponse<PagedResult<PartResponseDto>>
+                .SuccessResponse(pagedResult, "Search successful");
         }
     }
 }

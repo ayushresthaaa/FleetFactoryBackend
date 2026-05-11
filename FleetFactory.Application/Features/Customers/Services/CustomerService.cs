@@ -37,7 +37,8 @@ namespace FleetFactory.Application.Features.Customers.Services
 
             if (!userResult.Succeeded)
             {
-                var errors = string.Join(", ", userResult.Errors.Select(e => e.Description));
+                var errors = string.Join(", ", userResult.Errors.Select(e => e.Description)); //we can use toString 
+
                 return ApiResponse<CustomerResponseDto>.ErrorResponse(errors);
             }
 

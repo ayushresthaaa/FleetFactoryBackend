@@ -61,5 +61,47 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(
+            [FromQuery] string keyword,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _partService.SearchAsync(
+                keyword,
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
+        }
+
+        [HttpGet("low-stock")]
+        public async Task<IActionResult> GetLowStock(
+            [FromQuery] int threshold = 10)
+        {
+            var result = await _partService.GetLowStockAsync(threshold);
+
+            return Ok(result);
+        }
+
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailable()
+        {
+            var result = await _partService.GetAvailableAsync();
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id:guid}/stock-movements")]
+        public async Task<IActionResult> GetStockMovements(Guid id)
+        {
+            var result = await _partService.GetStockMovementsAsync(id);
+
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
+        }
     }
 }
