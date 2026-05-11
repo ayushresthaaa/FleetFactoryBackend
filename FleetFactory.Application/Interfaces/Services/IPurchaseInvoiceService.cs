@@ -22,5 +22,8 @@ namespace FleetFactory.Application.Interfaces.Services
             StatusUpdateAsync(Guid id);
 
         Task<ApiResponse<PurchaseInvoiceResponseDto>> ReceiveAsync(Guid id, string receivedById);
+
+        //cancel the invoice; only the pending invoices can be cancelled. 
+        Task<ApiResponse<PurchaseInvoiceResponseDto>> CancelAsync(Guid id);
     }
 }

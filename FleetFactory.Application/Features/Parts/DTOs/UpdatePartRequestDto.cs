@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using Microsoft.AspNetCore.Http;
 namespace FleetFactory.Application.Features.Parts.DTOs
 {
     public class UpdatePartRequestDto
@@ -29,5 +29,7 @@ namespace FleetFactory.Application.Features.Parts.DTOs
         public int StockQty { get; set; }
 
         public bool IsActive { get; set; }
+        public IFormFile? Image { get; set; }
+        public bool RemoveImage { get; set; }
     }
 }

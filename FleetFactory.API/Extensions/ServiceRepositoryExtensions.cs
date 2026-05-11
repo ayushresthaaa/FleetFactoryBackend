@@ -12,6 +12,8 @@ using FleetFactory.Application.Features.Staff.Services;
 using FleetFactory.Application.Features.CustomerSide.Services;
 using FleetFactory.Application.Features.LowStock.Services;
 using FleetFactory.Application.Features.Reports.Services;
+using FleetFactory.Application.Features.SalesInvoices.Services;
+using FleetFactory.Application.Features.PartCategories.Services;
 namespace FleetFactory.API.Extensions
 {
     public static class ServiceRepositoryExtensions
@@ -26,12 +28,15 @@ namespace FleetFactory.API.Extensions
             //business logic services
             services.AddScoped<IPartService, PartService>();
             services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
+            services.AddScoped<ISalesInvoiceService, SalesInvoiceService>();
+            services.AddScoped<IImageService, CloudinaryImageService>();
             services.AddScoped<IVendorService, VendorService>();
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<ICustomerSideService, CustomerSideService>();
             services.AddScoped<ILowStockService, LowStockService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IPartCategoryService, PartCategoryService>();
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
@@ -40,7 +45,9 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<IStaffRepository, StaffRepository>();
             services.AddScoped<ICustomerSideRepository, CustomerSideRepository>();
             services.AddScoped<ILowStockRepository, LowStockRepository>();
+            services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IPartCategoryRepository, PartCategoryRepository>();
             return services;
         }
     }

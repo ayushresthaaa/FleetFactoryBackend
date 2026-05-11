@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using Microsoft.AspNetCore.Http;
 namespace FleetFactory.Application.Features.Parts.DTOs
 {
     public class CreatePartRequestDto
@@ -27,5 +27,8 @@ namespace FleetFactory.Application.Features.Parts.DTOs
         [Required]
         [Range(0, int.MaxValue)]
         public int StockQty { get; set; }
+
+        public IFormFile? Image { get; set; }
+
     }
 }

@@ -25,5 +25,7 @@ namespace FleetFactory.Application.Features.Parts.DTOs
         public string? VendorName { get; set; }
 
         public DateTime CreatedAt { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? ImagePublicId { get; set; }
     }
 }
