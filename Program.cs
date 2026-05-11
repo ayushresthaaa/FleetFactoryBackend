@@ -33,6 +33,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 //configure DI for the services registration
 builder.Services.AddProjectServicesAndRepositories();
 
@@ -90,6 +102,9 @@ app.UseHttpsRedirection();
 
 //scheme means auth types, we will use JWT for our API
 //challenge -> if fails respond with rules of JWT
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
    
 app.UseAuthorization();
