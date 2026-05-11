@@ -40,10 +40,17 @@ namespace FleetFactory.Domain.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public Guid? AppointmentId { get; set; }
 
+        public decimal ServiceCharge { get; set; } = 0;
+
+        public string? ServiceDescription { get; set; }
         // Navigation
         public CustomerProfile Customer { get; set; } = null!;
+
         public Vehicle? Vehicle { get; set; }
+
+        public Appointment? Appointment { get; set; }
 
         public ICollection<SalesInvoiceItem> Items { get; set; } = new List<SalesInvoiceItem>();
     }

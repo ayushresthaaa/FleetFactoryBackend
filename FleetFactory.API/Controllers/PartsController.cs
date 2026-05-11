@@ -29,8 +29,8 @@ namespace FleetFactory.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePartRequestDto request)
+       [HttpPost]
+        public async Task<IActionResult> Create([FromForm] CreatePartRequestDto request)
         {
             var result = await _partService.CreateAsync(request);
 
@@ -40,8 +40,8 @@ namespace FleetFactory.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Data?.Id }, result);
         }
 
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePartRequestDto request)
+       [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, [FromForm] UpdatePartRequestDto request)
         {
             var result = await _partService.UpdateAsync(id, request);
 
