@@ -2,7 +2,7 @@ using FleetFactory.Application.Features.SalesInvoices.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-
+using FleetFactory.Domain.Enums;
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
@@ -29,12 +29,14 @@ namespace FleetFactory.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
+       [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateSalesInvoiceRequestDto request)
         {
             var createdById = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? User.FindFirstValue("sub")
-                ?? "a486b986-cf38-4280-a1f2-3994477915cb";
+                ?? User.FindFirstValue("sub");
+
+            if (string.IsNullOrWhiteSpace(createdById))
+                return Unauthorized();
 
             var result = await _salesInvoiceService.CreateAsync(request, createdById);
 
@@ -62,6 +64,35 @@ namespace FleetFactory.API.Controllers
 
             if (!result.Success)
                 return BadRequest(result);
+
+            return Ok(result);
+        }
+        //works with the search method in the repository and service to allow searching by customer name, invoice number, and filtering by status. Pagination is also supported.
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(
+            [FromQuery] string? query,
+            [FromQuery] InvoiceStatus? status,
+            [FromQuery] SalesInvoiceMode? mode, //used to seggregate between parts and appointment invoices; for frontend easiness
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _salesInvoiceService.SearchAsync(
+                query,
+                status,
+                mode,
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
+        }
+
+        [HttpGet("customer/{customerId:guid}/appointments")]
+        public async Task<IActionResult> GetCustomerAppointments(Guid customerId)
+        {
+            var result = await _salesInvoiceService.GetCustomerAppointmentsAsync(customerId);
+
+            if (!result.Success)
+                return NotFound(result);
 
             return Ok(result);
         }
