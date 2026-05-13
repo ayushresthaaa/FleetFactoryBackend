@@ -1,7 +1,7 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace FleetFactory.Shared.Helpers
+namespace FleetFactory.Infrastructure.Helpers
 {
     
     public static class MailKitHelper 

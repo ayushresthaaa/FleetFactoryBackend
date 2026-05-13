@@ -3,7 +3,7 @@ using FleetFactory.Application.Interfaces.Repositories;
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Shared.Results;
 using FleetFactory.Domain.Entities; 
-using FleetFactory.Shared.Helpers;
+using FleetFactory.Infrastructure.Helpers;
 
 namespace FleetFactory.Application.Features.Reports.Services
 {
@@ -68,6 +68,10 @@ namespace FleetFactory.Application.Features.Reports.Services
             
             //Fetch customers with credit balance who haven't paid in 30+ days
             return await _reportRepository.GetOverdueCreditCustomersAsync(threshold); 
+        }
+        public async Task<List<CustomerProfile>> GetCustomersWithCreditAsync()
+        {
+            return await _reportRepository.GetCustomersWithCreditAsync();
         }
     }
 }

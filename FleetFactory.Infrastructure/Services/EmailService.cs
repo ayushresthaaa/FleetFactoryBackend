@@ -1,5 +1,5 @@
 using FleetFactory.Application.Interfaces.Services;
-using FleetFactory.Shared.Helpers;
+using FleetFactory.Infrastructure.Helpers;
 
 namespace FleetFactory.Infrastructure.Services
 {

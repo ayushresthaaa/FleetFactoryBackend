@@ -7,5 +7,6 @@ namespace FleetFactory.Application.Interfaces.Services
     {
         Task<ApiResponse<FinancialReportResponseDTO>> GetFinancialReportAsync(string type);
         Task<List<CustomerProfile>> GetUnpaidCreditReportAsync();
+        Task<List<CustomerProfile>> GetCustomersWithCreditAsync();
     }
 }
