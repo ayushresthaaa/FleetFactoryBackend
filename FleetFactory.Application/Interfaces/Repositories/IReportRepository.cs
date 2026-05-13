@@ -7,5 +7,7 @@ namespace FleetFactory.Application.Interfaces.Repositories
         Task<List<SalesInvoice>> GetSalesInvoicesByDateRangeAsync(DateTime fromDate, DateTime toDate);
 
         Task<List<PurchaseInvoice>> GetPurchaseInvoicesByDateRangeAsync(DateTime fromDate, DateTime toDate);
+
+        Task<List<CustomerProfile>> GetOverdueCreditCustomersAsync(DateTime thresholdDate);
     }
 }

@@ -2,6 +2,8 @@ using FleetFactory.Application.Features.Reports.DTOs;
 using FleetFactory.Application.Interfaces.Repositories;
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Shared.Results;
+using FleetFactory.Domain.Entities; 
+using FleetFactory.Shared.Helpers;
 
 namespace FleetFactory.Application.Features.Reports.Services
 {
@@ -57,6 +59,15 @@ namespace FleetFactory.Application.Features.Reports.Services
 
             return ApiResponse<FinancialReportResponseDTO>
                 .SuccessResponse(response, "Financial report generated successfully");
+        }
+        //for overdue credit reports
+        public async Task<List<CustomerProfile>> GetUnpaidCreditReportAsync()
+        {
+            //Calculate 1 month ago using the Nepal timezone helper
+            var threshold = DateTimeHelper.NepalNow.AddMonths(-1); 
+            
+            //Fetch customers with credit balance who haven't paid in 30+ days
+            return await _reportRepository.GetOverdueCreditCustomersAsync(threshold); 
         }
     }
 }

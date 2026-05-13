@@ -1,4 +1,4 @@
-namespace FleetFactory.Infrastructure.Helpers
+namespace FleetFactory.Shared.Helpers
 {
     public static class DateTimeHelper
     {

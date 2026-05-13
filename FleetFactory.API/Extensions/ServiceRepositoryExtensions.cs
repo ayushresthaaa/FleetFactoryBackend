@@ -1,5 +1,7 @@
 using FleetFactory.Application.Interfaces.Repositories;
 using FleetFactory.Application.Interfaces.Services;
+
+
 using FleetFactory.Infrastructure.Repositories;
 using FleetFactory.Infrastructure.Services;
 
@@ -48,6 +50,7 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IPartCategoryRepository, PartCategoryRepository>();
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
     }
