@@ -28,5 +28,13 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Where(p => p.CreatedAt >= fromDate && p.CreatedAt <= toDate)
                 .ToListAsync();
         }
+
+        //gets those customer who paid using credit instead of payment
+        public async Task<List<CustomerProfile>> GetCustomersWithCreditAsync()
+        {
+            return await _context.CustomerProfiles
+                .Where(c => c.CreditBalance > 0)
+                .ToListAsync();
+        }
     }
 }

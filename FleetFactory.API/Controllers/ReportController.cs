@@ -17,5 +17,21 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+         // Customers with overdue / unpaid credit (30+ days logic in service)
+        [HttpGet("credit/unpaid")]
+        public async Task<IActionResult> GetUnpaidCreditReport()
+        {
+            var result = await _reportService.GetUnpaidCreditReportAsync();
+            return Ok(result);
+        }
+
+        // All customers currently using credit
+        [HttpGet("credit/all")]
+        public async Task<IActionResult> GetCustomersWithCredit()
+        {
+            var result = await _reportService.GetCustomersWithCreditAsync();
+            return Ok(result);
+        }
     }
 }
