@@ -53,11 +53,7 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
                 return ApiResponse<SalesInvoiceResponseDto>
                     .ErrorResponse("Invoice must contain at least one part item or service charge");
 
-            var invoiceExists = await _salesInvoiceRepository.ExistsByInvoiceNoAsync(request.InvoiceNo);
-
-            if (invoiceExists)
-                return ApiResponse<SalesInvoiceResponseDto>
-                    .ErrorResponse("Invoice number already exists");
+            var invoiceNo = $"SINV-{DateTime.UtcNow:yyyyMMddHHmmss}";
 
             var customer = await _customerRepository.GetByIdAsync(request.CustomerId);
 
@@ -70,13 +66,34 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
                 return ApiResponse<SalesInvoiceResponseDto>
                     .ErrorResponse("Vehicle does not belong to this customer");
             }
+            
+            //validate appointment if provided
+            Appointment? appointment = null;
+
+            if (request.AppointmentId.HasValue)
+            {
+                appointment = await _salesInvoiceRepository.GetAppointmentByIdAsync(request.AppointmentId.Value);
+
+                if (appointment == null)
+                    return ApiResponse<SalesInvoiceResponseDto>
+                        .ErrorResponse("Appointment not found");
+
+                if (appointment.CustomerId != request.CustomerId)
+                    return ApiResponse<SalesInvoiceResponseDto>
+                        .ErrorResponse("Appointment does not belong to this customer");
+
+                if (request.VehicleId.HasValue && appointment.VehicleId != request.VehicleId)
+                    return ApiResponse<SalesInvoiceResponseDto>
+                        .ErrorResponse("Appointment vehicle does not match selected vehicle");
+            }
+
 
             var invoice = new SalesInvoice
             {
                 CustomerId = request.CustomerId,
                 VehicleId = request.VehicleId,
                 AppointmentId = request.AppointmentId,
-                InvoiceNo = request.InvoiceNo.Trim(),
+                InvoiceNo = invoiceNo,
                 PaymentMethod = request.PaymentMethod,
                 ServiceCharge = request.ServiceCharge,
                 ServiceDescription = request.ServiceDescription,
@@ -149,6 +166,14 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
 
             var discountAmount = invoice.Subtotal * (invoice.DiscountPct / 100);
             invoice.TotalAmount = invoice.Subtotal - discountAmount;
+
+            //mark appointment as completed if linked
+            if (appointment != null)
+                {
+                    appointment.Status = AppointmentStatus.Completed;
+                    appointment.UpdatedAt = DateTimeHelper.UtcNow;
+                    _salesInvoiceRepository.UpdateAppointment(appointment);
+                }
 
             await _salesInvoiceRepository.AddAsync(invoice);
             await _salesInvoiceRepository.SaveChangesAsync();
@@ -233,6 +258,60 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
                     Subtotal = i.Quantity * i.UnitPrice
                 }).ToList()
             };
+        }
+        public async Task<ApiResponse<PagedResult<SalesInvoiceResponseDto>>> SearchAsync(
+            string? query,
+            InvoiceStatus? status,
+            SalesInvoiceMode? mode,
+            int pageNumber,
+            int pageSize)
+        {
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            var (invoices, totalCount) = await _salesInvoiceRepository.SearchAsync(
+                query,
+                status,
+                mode,
+                pageNumber,
+                pageSize);
+
+            var response = invoices.Select(MapToResponse).ToList();
+
+            var pagedResult = PagedResult<SalesInvoiceResponseDto>.Create(
+                response,
+                pageNumber,
+                pageSize,
+                totalCount
+            );
+
+            return ApiResponse<PagedResult<SalesInvoiceResponseDto>>
+                .SuccessResponse(pagedResult, "Sales invoice search completed");
+        }
+
+        public async Task<ApiResponse<List<CustomerAppointmentForInvoiceDto>>> GetCustomerAppointmentsAsync(Guid customerId)
+        {
+            var customer = await _customerRepository.GetByIdAsync(customerId);
+
+            if (customer == null)
+                return ApiResponse<List<CustomerAppointmentForInvoiceDto>>
+                    .ErrorResponse("Customer not found");
+
+            var appointments = await _salesInvoiceRepository.GetCustomerAppointmentsAsync(customerId);
+
+            var response = appointments.Select(a => new CustomerAppointmentForInvoiceDto
+            {
+                Id = a.Id,
+                CustomerId = a.CustomerId,
+                VehicleId = a.VehicleId,
+                VehicleNumber = a.Vehicle?.VehicleNumber,
+                ScheduledAt = a.ScheduledAt,
+                Status = a.Status.ToString(),
+                Notes = a.Notes
+            }).ToList();
+
+            return ApiResponse<List<CustomerAppointmentForInvoiceDto>>
+                .SuccessResponse(response, "Customer appointments retrieved");
         }
     }
 }
