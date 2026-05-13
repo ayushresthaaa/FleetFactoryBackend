@@ -1,58 +1,54 @@
-using FleetFactory.Application.Features;
 using FleetFactory.Application.Interfaces.Services;
-using FleetFactory.Domain.Entities;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
 
-namespace FleetFactory.Infrastructure.Services
+namespace FleetFactory.Infrastructure.External;
+
+public class MailkitEmailProvider : IMailService
 {
-    public class MailKitProvider(
-        IOptions<MailSetting> _mailSettings)
-        : IMailService
+    private readonly IConfiguration _configuration;
+
+    public MailkitEmailProvider(IConfiguration configuration)
     {
-        public async Task SendEmailAsync(EmailDto emailDto)
+        _configuration = configuration;
+    }
+
+    public async Task SendEmailAsync(
+        string toEmail,
+        string subject,
+        string body)
+    {
+        var email = new MimeMessage();
+
+        email.From.Add(
+            MailboxAddress.Parse(
+                _configuration["MailSettings:Email"]));
+
+        email.To.Add(
+            MailboxAddress.Parse(toEmail));
+
+        email.Subject = subject;
+
+        email.Body = new TextPart("plain")
         {
-            var email = new MimeMessage();
+            Text = body
+        };
 
-            // Sender
-            email.From.Add(
-                new MailboxAddress(
-                    _mailSettings.Value.DisplayName,
-                    _mailSettings.Value.Email));
+        using var smtp = new SmtpClient();
 
-            // Receiver
-            email.To.Add(
-                MailboxAddress.Parse(emailDto.ToEmail));
+        await smtp.ConnectAsync(
+            _configuration["MailSettings:Host"],
+            int.Parse(_configuration["MailSettings:Port"]),
+            SecureSocketOptions.StartTls);
 
-            // Subject
-            email.Subject = emailDto.Subject;
+        await smtp.AuthenticateAsync(
+            _configuration["MailSettings:Email"],
+            _configuration["MailSettings:Password"]);
 
-            // Body
-            email.Body = new TextPart("html")
-            {
-                Text = emailDto.Body
-            };
+        await smtp.SendAsync(email);
 
-            using var smtp = new SmtpClient();
-
-            // Connect SMTP
-            await smtp.ConnectAsync(
-                _mailSettings.Value.Host,
-                _mailSettings.Value.Port,
-                SecureSocketOptions.Auto);
-
-            // Login
-            await smtp.AuthenticateAsync(
-                _mailSettings.Value.Email,
-                _mailSettings.Value.Password);
-
-            // Send Mail
-            await smtp.SendAsync(email);
-
-            // Disconnect
-            await smtp.DisconnectAsync(true);
-        }
+        await smtp.DisconnectAsync(true);
     }
 }

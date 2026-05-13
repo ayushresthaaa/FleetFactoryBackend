@@ -6,29 +6,26 @@ namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/sales-invoice-email")]
-    public class SalesInvoiceEmailController(
-        ISalesInvoiceEmailService _salesInvoiceEmailService)
-        : ControllerBase
+     private readonly ISalesInvoiceEmailService _service;
+
+    public SalesInvoiceEmailController(
+        ISalesInvoiceEmailService service)
     {
-        [HttpPost("send")]
-        public async Task<IActionResult> SendInvoiceEmail(
-            SendSalesInvoiceMailDto dto)
+        _service = service;
+    }
+
+    [HttpPost("send")]
+    public async Task<IActionResult> SendInvoiceMail(
+        SendSalesInvoiceMailRequestDTO request)
+    {
+        var result = await _service
+            .SendSalesInvoiceMailAsync(request.SalesInvoiceId);
+
+        if (!result)
         {
-            var result = await _salesInvoiceEmailService
-                .SendSalesInvoiceEmailAsync(dto);
-
-            if (!result)
-            {
-                return NotFound(new
-                {
-                    Message = "Customer not found"
-                });
-            }
-
-            return Ok(new
-            {
-                Message = "Invoice email sent successfully"
-            });
+            return BadRequest("Invoice not found");
         }
+
+        return Ok("Invoice mail sent successfully");
     }
 }

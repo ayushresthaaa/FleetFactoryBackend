@@ -41,6 +41,8 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ICustomerSideRepository, CustomerSideRepository>();
             services.AddScoped<ILowStockRepository, LowStockRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<ISalesEmailRepository, SalesInvoiceEmailRepository>();
+            services.AddScoped<ISalesInvoiceEmailService, SalesInvoiceEmailService>();
             return services;
         }
     }
