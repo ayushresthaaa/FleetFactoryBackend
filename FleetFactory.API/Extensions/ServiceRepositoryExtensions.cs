@@ -41,6 +41,12 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ICustomerSideRepository, CustomerSideRepository>();
             services.AddScoped<ILowStockRepository, LowStockRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+<<<<<<< Updated upstream
+=======
+            services.AddScoped<IPartCategoryRepository, PartCategoryRepository>();
+            services.AddScoped<IEmailService, EmailService>();
+            
+>>>>>>> Stashed changes
             return services;
         }
     }
