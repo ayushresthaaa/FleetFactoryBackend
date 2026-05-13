@@ -120,6 +120,7 @@ builder.Services.AddAuthentication(
 builder.Services.AddHostedService<LowStockBackgroundService>();
 var app = builder.Build();
 
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())

@@ -7,6 +7,14 @@ namespace FleetFactory.Infrastructure.Repositories
 {
     public class ReportRepository(AppDbContext _context) : IReportRepository
     {
+        public async Task<List<CustomerProfile>> GetOverdueCreditCustomersAsync(DateTime thresholdDate)
+        {
+            //Customers with debt who haven't updated in over a month
+            return await _context.CustomerProfiles
+                .Where(c => c.CreditBalance > 0 && 
+                           (c.UpdatedAt <= thresholdDate || c.CreatedAt <= thresholdDate))
+                .ToListAsync();
+        }
         public async Task<List<SalesInvoice>> GetSalesInvoicesByDateRangeAsync(DateTime fromDate, DateTime toDate)
         {
             return await _context.SalesInvoices

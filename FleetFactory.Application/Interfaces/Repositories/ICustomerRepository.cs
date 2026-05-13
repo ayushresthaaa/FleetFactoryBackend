@@ -16,5 +16,8 @@ namespace FleetFactory.Application.Interfaces.Repositories
 
         //rabison part
         Task<List<CustomerProfile>> SearchAsync(string query);
+
+        //seer part 
+        Task<List<CustomerProfile>> GetCustomersWithCreditAsync();
     }
 }
