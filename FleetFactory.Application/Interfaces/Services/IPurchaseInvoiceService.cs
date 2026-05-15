@@ -1,6 +1,6 @@
 using FleetFactory.Application.Features.PurchaseInvoices.DTOs;
 using FleetFactory.Shared.Results;
-
+using FleetFactory.Domain.Enums;
 namespace FleetFactory.Application.Interfaces.Services
 {
     public interface IPurchaseInvoiceService
@@ -25,5 +25,12 @@ namespace FleetFactory.Application.Interfaces.Services
 
         //cancel the invoice; only the pending invoices can be cancelled. 
         Task<ApiResponse<PurchaseInvoiceResponseDto>> CancelAsync(Guid id);
+
+        Task<ApiResponse<PagedResult<PurchaseInvoiceResponseDto>>> SearchAsync(
+            string? query,
+            InvoiceStatus? status,
+            int pageNumber,
+            int pageSize
+        );
     }
 }

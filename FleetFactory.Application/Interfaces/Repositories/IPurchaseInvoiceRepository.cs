@@ -1,5 +1,5 @@
 using FleetFactory.Domain.Entities;
-
+using FleetFactory.Domain.Enums;
 namespace FleetFactory.Application.Interfaces.Repositories
 {
     public interface IPurchaseInvoiceRepository
@@ -17,5 +17,12 @@ namespace FleetFactory.Application.Interfaces.Repositories
         Task SaveChangesAsync();
 
         //addded because stock movements are created as part of purchase invoice processing, so we can save them in the same transaction
+
+        Task<(List<PurchaseInvoice> Items, int TotalCount)> SearchAsync(
+            string? query,
+            InvoiceStatus? status,
+            int pageNumber,
+            int pageSize
+        );
     }
 }
