@@ -4,10 +4,12 @@ using FleetFactory.Infrastructure.Identity;
 using FleetFactory.Infrastructure.Services;
 using FleetFactory.Shared.Results;
 using Microsoft.AspNetCore.Identity; 
+using FleetFactory.Domain.Entities; 
+using FleetFactory.Infrastructure.Persistence; 
 
 namespace FleetFactory.Infrastructure.Services
 {
-    public class AuthService(JwtService jwtService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager): IAuthService
+    public class AuthService(JwtService jwtService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, AppDbContext context): IAuthService
     {
         public async Task<ApiResponse<AuthResponseDto>> RegisterAsync(RegisterRequestDto request)
         {
@@ -31,6 +33,19 @@ namespace FleetFactory.Infrastructure.Services
 
             await userManager.AddToRoleAsync(user, role); //adding the role specified by the user or fallback
 
+           var customerProfile = new CustomerProfile
+            {
+                UserId = user.Id,
+                FullName = $"{request.FirstName} {request.LastName}".Trim(),
+                Phone = request.Phone,
+                Address = request.Address,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            context.CustomerProfiles.Add(customerProfile);
+            await context.SaveChangesAsync();
+            
             var token = await jwtService.GenerateTokenAsync(user);
 
             var response = new AuthResponseDto
