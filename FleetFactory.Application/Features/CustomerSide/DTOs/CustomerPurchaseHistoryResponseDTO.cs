@@ -13,5 +13,9 @@ namespace FleetFactory.Application.Features.CustomerSide.DTOs
         public decimal TotalAmount { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public string? VehicleNumber { get; set; }
+
+        public int ItemCount { get; set; }
     }
 }

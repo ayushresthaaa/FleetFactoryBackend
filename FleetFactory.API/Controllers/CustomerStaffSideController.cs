@@ -65,7 +65,7 @@ namespace FleetFactory.API.Controllers
             return Ok(result);
         }
 
-        //rabison part
+        //rabison part: this is to be replaced by customer lookup controller 
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string query)
         {
