@@ -10,5 +10,11 @@ namespace FleetFactory.Application.Interfaces.Services
 
         Task<ApiResponse<List<CustomerAppointmentHistoryResponseDto>>>
             GetMyAppointmentHistoryAsync(string userId);
+
+        Task<ApiResponse<List<CustomerAppointmentHistoryResponseDto>>>
+            GetMyUpcomingAppointmentsAsync(string userId);
+
+        Task<ApiResponse<CustomerAppointmentHistoryResponseDto>>
+            GetMyAppointmentByIdAsync(string userId, Guid appointmentId);
     }
 }
