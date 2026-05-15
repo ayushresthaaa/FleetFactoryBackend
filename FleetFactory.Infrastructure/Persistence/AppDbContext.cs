@@ -59,11 +59,11 @@ namespace FleetFactory.Infrastructure.Persistence
             
             //user - customerprofile
             builder.Entity<CustomerProfile>()
-                .HasOne<ApplicationUser>()
+                .HasOne(c => c.User)
                 .WithOne(u => u.CustomerProfile)
                 .HasForeignKey<CustomerProfile>(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+                
             //customerprofile - vehicle
             builder.Entity<Vehicle>()
                 .HasOne(v => v.Customer)

@@ -16,6 +16,8 @@ using FleetFactory.Application.Features.LowStock.Services;
 using FleetFactory.Application.Features.Reports.Services;
 using FleetFactory.Application.Features.SalesInvoices.Services;
 using FleetFactory.Application.Features.PartCategories.Services;
+using FleetFactory.Application.Features.CustomerLookup.Services; 
+
 namespace FleetFactory.API.Extensions
 {
     public static class ServiceRepositoryExtensions
@@ -26,6 +28,7 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<JwtService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICacheService, CacheService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             //business logic services
             services.AddScoped<IPartService, PartService>();
@@ -39,6 +42,8 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ILowStockService, LowStockService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IPartCategoryService, PartCategoryService>();
+            services.AddScoped<ICustomerLookupService, CustomerLookupService>();
+            
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
@@ -50,7 +55,8 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IPartCategoryRepository, PartCategoryRepository>();
-            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ICustomerLookupRepository, CustomerLookupRepository>();
+            
             return services;
         }
     }
