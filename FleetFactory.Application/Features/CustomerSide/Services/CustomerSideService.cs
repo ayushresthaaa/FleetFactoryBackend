@@ -9,10 +9,15 @@ namespace FleetFactory.Application.Features.CustomerSide.Services
         : ICustomerSideService
     {
         public async Task<ApiResponse<List<CustomerPurchaseHistoryResponseDto>>>
-            GetPurchaseHistoryAsync(Guid customerId)
+            GetMyPurchaseHistoryAsync(string userId)
         {
-            var invoices = await _customerSideRepository
-                .GetPurchaseHistoryAsync(customerId);
+            var customer = await _customerSideRepository.GetCustomerByUserIdAsync(userId);
+
+            if (customer == null)
+                return ApiResponse<List<CustomerPurchaseHistoryResponseDto>>
+                    .ErrorResponse("Customer profile not found");
+
+            var invoices = await _customerSideRepository.GetPurchaseHistoryAsync(customer.Id);
 
             var response = invoices.Select(s => new CustomerPurchaseHistoryResponseDto
             {
@@ -20,11 +25,37 @@ namespace FleetFactory.Application.Features.CustomerSide.Services
                 InvoiceNo = s.InvoiceNo,
                 Status = s.Status,
                 TotalAmount = s.TotalAmount,
-                CreatedAt = s.CreatedAt
+                CreatedAt = s.CreatedAt,
+                VehicleNumber = s.Vehicle?.VehicleNumber,
+                ItemCount = s.Items?.Count ?? 0
             }).ToList();
 
             return ApiResponse<List<CustomerPurchaseHistoryResponseDto>>
                 .SuccessResponse(response, "Purchase history retrieved successfully");
+        }
+
+        public async Task<ApiResponse<List<CustomerAppointmentHistoryResponseDto>>>
+            GetMyAppointmentHistoryAsync(string userId)
+        {
+            var customer = await _customerSideRepository.GetCustomerByUserIdAsync(userId);
+
+            if (customer == null)
+                return ApiResponse<List<CustomerAppointmentHistoryResponseDto>>
+                    .ErrorResponse("Customer profile not found");
+
+            var appointments = await _customerSideRepository.GetAppointmentHistoryAsync(customer.Id);
+
+            var response = appointments.Select(a => new CustomerAppointmentHistoryResponseDto
+            {
+                AppointmentId = a.Id,
+                VehicleNumber = a.Vehicle?.VehicleNumber,
+                ScheduledAt = a.ScheduledAt,
+                Status = a.Status.ToString(),
+                Notes = a.Notes
+            }).ToList();
+
+            return ApiResponse<List<CustomerAppointmentHistoryResponseDto>>
+                .SuccessResponse(response, "Appointment history retrieved successfully");
         }
     }
 }

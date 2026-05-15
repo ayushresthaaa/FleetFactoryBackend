@@ -213,7 +213,7 @@ namespace FleetFactory.Application.Features.Customers.Services
                 .SuccessResponse(response, "Customer history retrieved successfully");
         }
 
-        //rabison part
+        //rabison part 
         public async Task<ApiResponse<List<CustomerSearchResponseDto>>> SearchAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -244,6 +244,4 @@ namespace FleetFactory.Application.Features.Customers.Services
         }
     }
 
-    
-    
 }
