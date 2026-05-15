@@ -2,6 +2,7 @@ using FleetFactory.Application.Features.PurchaseInvoices.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using FleetFactory.Domain.Enums;
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
@@ -81,5 +82,22 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(
+            [FromQuery] string? query,
+            [FromQuery] InvoiceStatus? status,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _purchaseInvoiceService.SearchAsync(
+                query,
+                status,
+                pageNumber,
+                pageSize
+            );
+
+            return Ok(result);
+        }
+
     }
 }
