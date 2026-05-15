@@ -22,7 +22,8 @@ namespace FleetFactory.Infrastructure.Services
             //claims 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id), 
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(ClaimTypes.NameIdentifier, user.Id), //this is used to identify the user in the system and is a standard claim type for user id
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
                 new Claim("firstName", user.FirstName), 
                 new Claim("lastName", user.LastName ?? "")

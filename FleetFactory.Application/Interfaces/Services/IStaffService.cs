@@ -5,10 +5,14 @@ namespace FleetFactory.Application.Interfaces.Services
 {
     public interface IStaffService
     {
-        Task<ApiResponse<StaffResponseDto>> RegisterStaffAsync(RegisterStaffRequestDto request);
-        Task<ApiResponse<List<StaffSummaryDto>>> GetAllStaffAsync();
-        Task<ApiResponse<StaffResponseDto>> GetStaffByIdAsync(string userId);
-        Task<ApiResponse<StaffResponseDto>> UpdateStaffAsync(string userId, UpdateStaffRequestDto request);
-        Task<ApiResponse<StaffResponseDto>> SetStaffStatusAsync(string userId, SetStaffStatusRequestDto request);
+        Task<ApiResponse<PagedResult<StaffResponseDTO>>> GetAllAsync(int pageNumber, int pageSize);
+
+        Task<ApiResponse<StaffResponseDTO>> GetByIdAsync(Guid id);
+
+        Task<ApiResponse<StaffResponseDTO>> CreateAsync(CreateStaffRequestDTO request);
+
+        Task<ApiResponse<StaffResponseDTO>> UpdateAsync(Guid id, UpdateStaffRequestDTO request);
+
+        Task<ApiResponse<string>> DeactivateAsync(Guid id);
     }
 }

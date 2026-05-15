@@ -1,230 +1,204 @@
 using FleetFactory.Application.Features.Staff.DTOs;
+using FleetFactory.Application.Interfaces.Repositories;
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Domain.Entities;
 using FleetFactory.Infrastructure.Identity;
-using FleetFactory.Infrastructure.Persistence;
 using FleetFactory.Shared.Results;
+using FleetFactory.Infrastructure.Helpers;
+
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace FleetFactory.Application.Features.Staff.Services
 {
-
     public class StaffService(
-        UserManager<ApplicationUser> _userManager,
-        AppDbContext _context) : IStaffService
+        IStaffRepository _staffRepository,
+        UserManager<ApplicationUser> _userManager
+    ) : IStaffService
     {
-        public async Task<ApiResponse<StaffResponseDto>> RegisterStaffAsync(RegisterStaffRequestDto request)
+        public async Task<ApiResponse<PagedResult<StaffResponseDTO>>> GetAllAsync(int pageNumber, int pageSize)
         {
-            //only Staff or Admin allowed here
-            if (request.Role != "Staff" && request.Role != "Admin")
-                return ApiResponse<StaffResponseDto>.ErrorResponse("Role must be 'Staff' or 'Admin'.");
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            pageSize = pageSize < 1 ? 10 : pageSize;
 
-            //check email uniqueness (UserManager handles the Users table)
-            var existing = await _userManager.FindByEmailAsync(request.Email);
-            if (existing != null)
-                return ApiResponse<StaffResponseDto>.ErrorResponse($"Email '{request.Email}' is already registered.");
+            var (staffs, totalCount) = await _staffRepository.GetPagedAsync(pageNumber, pageSize);
 
-            //create ApplicationUser via Identity (handles password hashing)
+            var responseList = new List<StaffResponseDTO>();
 
-            var user = new ApplicationUser
+            foreach (var staff in staffs)
             {
-                UserName  = request.Email,
-                Email     = request.Email,
-                FirstName = request.FirstName,
-                LastName  = request.LastName,
-                IsActive  = true
-            };
+                var user = await _userManager.FindByIdAsync(staff.UserId);
 
-            var createResult = await _userManager.CreateAsync(user, request.Password);
-            if (!createResult.Succeeded)
-            {
-                var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-                return ApiResponse<StaffResponseDto>.ErrorResponse(errors);
-            }
+                if (user == null) continue;
 
-            //assign role (Staff or Admin)
-            var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
-            if (!roleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(user); // rollback
-                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                return ApiResponse<StaffResponseDto>.ErrorResponse(errors);
-            }
-
-            //create StaffProfile
-            var profile = new StaffProfile
-            {
-                UserId   = user.Id,   //user.Id is string (Identity)
-                FullName = $"{request.FirstName} {request.LastName}".Trim(),
-                Phone    = request.Phone,
-                Address  = request.Address,
-                HiredAt  = request.HiredAt
-            };
-
-            await _context.StaffProfiles.AddAsync(profile);
-            await _context.SaveChangesAsync();
-
-            return ApiResponse<StaffResponseDto>.SuccessResponse(
-                MapToResponse(user, profile, request.Role),
-                "Staff registered successfully."
-            );
-        }
-
-        public async Task<ApiResponse<List<StaffSummaryDto>>> GetAllStaffAsync()
-        {
-            //get IDs of all Staff and Admin users from Identity
-            var staffUsers = await _userManager.GetUsersInRoleAsync("Staff");
-            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-
-            var allUsers = staffUsers.Concat(adminUsers)
-                                     .DistinctBy(u => u.Id)
-                                     .ToList();
-
-            var userIds = allUsers.Select(u => u.Id).ToList();
-
-            //load StaffProfiles for those users 
-            var profiles = await _context.StaffProfiles
-                .Where(sp => userIds.Contains(sp.UserId))
-                .ToListAsync();
-
-            var profileMap = profiles.ToDictionary(sp => sp.UserId);
-
-            var summaries = new List<StaffSummaryDto>();
-
-            foreach (var user in allUsers.OrderBy(u => u.FirstName))
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                var role  = roles.FirstOrDefault() ?? "Staff";
-
-                profileMap.TryGetValue(user.Id, out var profile);
-
-                summaries.Add(new StaffSummaryDto
+                responseList.Add(new StaffResponseDTO
                 {
-                    UserId   = user.Id,
-                    FullName = profile?.FullName ?? $"{user.FirstName} {user.LastName}",
-                    Email    = user.Email!,
-                    Phone    = profile?.Phone,
-                    Role     = role,
+                    StaffProfileId = staff.Id,
+                    UserId = user.Id,
+                    Email = user.Email!,
+                    FullName = staff.FullName,
+                    Phone = staff.Phone,
+                    Address = staff.Address,
+                    HiredAt = staff.HiredAt,
                     IsActive = user.IsActive,
-                    HiredAt  = profile?.HiredAt
+                    CreatedAt = staff.CreatedAt
                 });
             }
 
-            return ApiResponse<List<StaffSummaryDto>>.SuccessResponse(
-                summaries,
-                "Staff list retrieved successfully."
+            var paged = PagedResult<StaffResponseDTO>.Create(
+                responseList,
+                pageNumber,
+                pageSize,
+                totalCount
             );
+
+            return ApiResponse<PagedResult<StaffResponseDTO>>.SuccessResponse(paged, "Staff retrieved");
         }
 
-        public async Task<ApiResponse<StaffResponseDto>> GetStaffByIdAsync(string userId)
+        public async Task<ApiResponse<StaffResponseDTO>> GetByIdAsync(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var staff = await _staffRepository.GetByIdAsync(id);
+
+            if (staff == null)
+                return ApiResponse<StaffResponseDTO>.ErrorResponse("Staff not found");
+
+            var user = await _userManager.FindByIdAsync(staff.UserId);
+
             if (user == null)
-                return ApiResponse<StaffResponseDto>.ErrorResponse("Staff member not found.");
+                return ApiResponse<StaffResponseDTO>.ErrorResponse("User not found");
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var role  = roles.FirstOrDefault() ?? "Staff";
-
-            // only return if Staff or Admin
-            if (role != "Staff" && role != "Admin")
-                return ApiResponse<StaffResponseDto>.ErrorResponse("Staff member not found.");
-
-            var profile = await _context.StaffProfiles
-                .FirstOrDefaultAsync(sp => sp.UserId == userId);
-
-            return ApiResponse<StaffResponseDto>.SuccessResponse(
-                MapToResponse(user, profile, role),
-                "Staff member retrieved."
-            );
-        }
-
-        public async Task<ApiResponse<StaffResponseDto>> UpdateStaffAsync(string userId, UpdateStaffRequestDto request)
-        {
-            if (request.Role != "Staff" && request.Role != "Admin")
-                return ApiResponse<StaffResponseDto>.ErrorResponse("Role must be 'Staff' or 'Admin'.");
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return ApiResponse<StaffResponseDto>.ErrorResponse("Staff member not found.");
-
-            //update Identity user fields
-            user.FirstName = request.FirstName;
-            user.LastName  = request.LastName;
-            user.UpdatedAt = DateTime.UtcNow;
-            await _userManager.UpdateAsync(user);
-
-            //update role if changed
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            var currentRole  = currentRoles.FirstOrDefault() ?? "Staff";
-            if (currentRole != request.Role)
+            var response = new StaffResponseDTO
             {
-                await _userManager.RemoveFromRoleAsync(user, currentRole);
-                await _userManager.AddToRoleAsync(user, request.Role);
+                StaffProfileId = staff.Id,
+                UserId = user.Id,
+                Email = user.Email!,
+                FullName = staff.FullName,
+                Phone = staff.Phone,
+                Address = staff.Address,
+                HiredAt = staff.HiredAt,
+                IsActive = user.IsActive,
+                CreatedAt = staff.CreatedAt
+            };
+
+            return ApiResponse<StaffResponseDTO>.SuccessResponse(response, "Staff fetched");
+        }
+
+        public async Task<ApiResponse<StaffResponseDTO>> CreateAsync(CreateStaffRequestDTO request)
+        {
+            // Create Identity User
+            var user = new ApplicationUser
+            {
+                UserName = request.Email,
+                Email = request.Email,
+                FirstName = request.FullName,
+                IsActive = true
+            };
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return ApiResponse<StaffResponseDTO>.ErrorResponse(errors);
             }
 
-            //update StaffProfile
-            var profile = await _context.StaffProfiles
-                .FirstOrDefaultAsync(sp => sp.UserId == userId);
+            // Assign Staff role
+            await _userManager.AddToRoleAsync(user, "Staff");
 
-            if (profile != null)
+            // Create StaffProfile
+            var staff = new StaffProfile
             {
-                profile.FullName  = $"{request.FirstName} {request.LastName}".Trim();
-                profile.Phone     = request.Phone;
-                profile.Address   = request.Address;
-                profile.HiredAt   = request.HiredAt;
-                profile.UpdatedAt = DateTime.UtcNow;
-                _context.StaffProfiles.Update(profile);
-                await _context.SaveChangesAsync();
-            }
+                UserId = user.Id,
+                FullName = request.FullName,
+                Phone = request.Phone,
+                Address = request.Address,
+                HiredAt = request.HiredAt.HasValue
+                        ? DateTime.SpecifyKind(request.HiredAt.Value, DateTimeKind.Utc)
+                        : null,
+                CreatedAt = DateTimeHelper.UtcNow,
+                UpdatedAt = DateTimeHelper.UtcNow
+            };
 
-            return ApiResponse<StaffResponseDto>.SuccessResponse(
-                MapToResponse(user, profile, request.Role),
-                "Staff updated successfully."
-            );
+            await _staffRepository.AddAsync(staff);
+            await _staffRepository.SaveChangesAsync();
+
+            var response = new StaffResponseDTO
+            {
+                StaffProfileId = staff.Id,
+                UserId = user.Id,
+                Email = user.Email!,
+                FullName = staff.FullName,
+                Phone = staff.Phone,
+                Address = staff.Address,
+                HiredAt = staff.HiredAt,
+                IsActive = user.IsActive,
+                CreatedAt = staff.CreatedAt
+            };
+
+            return ApiResponse<StaffResponseDTO>.SuccessResponse(response, "Staff created successfully");
         }
 
-        public async Task<ApiResponse<StaffResponseDto>> SetStaffStatusAsync(string userId, SetStaffStatusRequestDto request)
+        public async Task<ApiResponse<StaffResponseDTO>> UpdateAsync(Guid id, UpdateStaffRequestDTO request)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return ApiResponse<StaffResponseDto>.ErrorResponse("Staff member not found.");
+            var staff = await _staffRepository.GetByIdAsync(id);
 
-            user.IsActive  = request.IsActive;
-            user.UpdatedAt = DateTime.UtcNow;
+            if (staff == null)
+                return ApiResponse<StaffResponseDTO>.ErrorResponse("Staff not found");
+
+            var user = await _userManager.FindByIdAsync(staff.UserId);
+
+            if (user == null)
+                return ApiResponse<StaffResponseDTO>.ErrorResponse("User not found");
+
+            // update staff profile
+            staff.FullName = request.FullName;
+            staff.Phone = request.Phone;
+            staff.Address = request.Address;
+            staff.HiredAt = request.HiredAt.HasValue
+                ? DateTime.SpecifyKind(request.HiredAt.Value, DateTimeKind.Utc)
+                : null;
+            staff.UpdatedAt = DateTimeHelper.UtcNow;
+
+            // update user active state
+            user.IsActive = request.IsActive;
+
+            _staffRepository.Update(staff);
+            await _staffRepository.SaveChangesAsync();
+
             await _userManager.UpdateAsync(user);
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var role  = roles.FirstOrDefault() ?? "Staff";
+            var response = new StaffResponseDTO
+            {
+                StaffProfileId = staff.Id,
+                UserId = user.Id,
+                Email = user.Email!,
+                FullName = staff.FullName,
+                Phone = staff.Phone,
+                Address = staff.Address,
+                HiredAt = staff.HiredAt,
+                IsActive = user.IsActive,
+                CreatedAt = staff.CreatedAt
+            };
 
-            var profile = await _context.StaffProfiles
-                .FirstOrDefaultAsync(sp => sp.UserId == userId);
-
-            var action = request.IsActive ? "activated" : "deactivated";
-            return ApiResponse<StaffResponseDto>.SuccessResponse(
-                MapToResponse(user, profile, role),
-                $"Staff account {action} successfully."
-            );
+            return ApiResponse<StaffResponseDTO>.SuccessResponse(response, "Staff updated");
         }
 
-        //maps ApplicationUser + StaffProfile = response DTO
-        private static StaffResponseDto MapToResponse(
-            ApplicationUser user,
-            StaffProfile?   profile,
-            string          role) => new()
+        public async Task<ApiResponse<string>> DeactivateAsync(Guid id)
         {
-            UserId         = user.Id,
-            StaffProfileId = profile?.Id ?? Guid.Empty,
-            Email          = user.Email!,
-            FirstName      = user.FirstName,
-            LastName       = user.LastName,
-            FullName       = profile?.FullName ?? $"{user.FirstName} {user.LastName}",
-            Phone          = profile?.Phone,
-            Address        = profile?.Address,
-            HiredAt        = profile?.HiredAt,
-            Role           = role,
-            IsActive       = user.IsActive,
-            CreatedAt      = user.CreatedAt
-        };
+            var staff = await _staffRepository.GetByIdAsync(id);
+
+            if (staff == null)
+                return ApiResponse<string>.ErrorResponse("Staff not found");
+
+            var user = await _userManager.FindByIdAsync(staff.UserId);
+
+            if (user == null)
+                return ApiResponse<string>.ErrorResponse("User not found");
+
+            user.IsActive = false;
+
+            await _userManager.UpdateAsync(user);
+
+            return ApiResponse<string>.SuccessResponse("Deactivated", "Staff deactivated");
+        }
     }
 }

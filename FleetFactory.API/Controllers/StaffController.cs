@@ -1,37 +1,26 @@
 using FleetFactory.Application.Features.Staff.DTOs;
 using FleetFactory.Application.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
     public class StaffController(IStaffService _staffService) : ControllerBase
     {
-        [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegisterStaffRequestDto request)
-        {
-            var result = await _staffService.RegisterStaffAsync(request);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return Created("", result);
-        }
-
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var result = await _staffService.GetAllStaffAsync();
+            var result = await _staffService.GetAllAsync(pageNumber, pageSize);
             return Ok(result);
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetById(string userId)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _staffService.GetStaffByIdAsync(userId);
+            var result = await _staffService.GetByIdAsync(id);
 
             if (!result.Success)
                 return NotFound(result);
@@ -39,10 +28,25 @@ namespace FleetFactory.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{userId}")]
-        public async Task<IActionResult> Update(string userId, [FromBody] UpdateStaffRequestDto request)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateStaffRequestDTO request)
         {
-            var result = await _staffService.UpdateStaffAsync(userId, request);
+            var result = await _staffService.CreateAsync(request);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = result.Data?.StaffProfileId },
+                result
+            );
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStaffRequestDTO request)
+        {
+            var result = await _staffService.UpdateAsync(id, request);
 
             if (!result.Success)
                 return BadRequest(result);
@@ -50,11 +54,10 @@ namespace FleetFactory.API.Controllers
             return Ok(result);
         }
 
-        //PATCH for status toggle 
-        [HttpPatch("{userId}/status")]
-        public async Task<IActionResult> SetStatus(string userId, [FromBody] SetStaffStatusRequestDto request)
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Deactivate(Guid id)
         {
-            var result = await _staffService.SetStaffStatusAsync(userId, request);
+            var result = await _staffService.DeactivateAsync(id);
 
             if (!result.Success)
                 return NotFound(result);
