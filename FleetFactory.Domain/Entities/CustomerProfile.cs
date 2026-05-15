@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using FleetFactory.Infrastructure.Identity;
 namespace FleetFactory.Domain.Entities
 {
     public class CustomerProfile
@@ -27,7 +27,15 @@ namespace FleetFactory.Domain.Entities
     
         // Navigation
         public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
+        
         //this is for the sales invoice by the customer
         public ICollection<SalesInvoice> SalesInvoices { get; set; } = new List<SalesInvoice>();
+
+        public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public ICollection<PartRequest> PartRequests { get; set; } = new List<PartRequest>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        
+        //navigation to the identity user 
+        public ApplicationUser User { get; set; } = null!;
     }
 }

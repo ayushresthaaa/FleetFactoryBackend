@@ -1,10 +1,9 @@
+using System.Threading.Tasks;
+
 namespace FleetFactory.Application.Interfaces.Services
 {
     public interface IEmailService
     {
-        Task SendUnpaidCreditReminderAsync(
-            string customerEmail,
-            string customerName,
-            decimal amount);
+        Task SendUnpaidCreditReminderAsync(string customerEmail, string customerName, decimal amount);
     }
 }

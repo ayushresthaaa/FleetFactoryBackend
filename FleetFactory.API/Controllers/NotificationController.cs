@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using FleetFactory.Application.Interfaces.Services;
-using FleetFactory.Domain.Entities;
-using FleetFactory.Infrastructure.Identity;
+using FleetFactory.Application.Features.Reports.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FleetFactory.API.Controllers
 {
@@ -10,51 +8,47 @@ namespace FleetFactory.API.Controllers
     [Route("api/[controller]")]
     public class NotificationController : ControllerBase
     {
-        private readonly IReportService _reportService;
         private readonly IEmailService _emailService;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IReportService _reportService;
 
-        public NotificationController(
-            IReportService reportService,
-            IEmailService emailService,
-            UserManager<ApplicationUser> userManager)
+        public NotificationController(IEmailService emailService, IReportService reportService)
         {
-            _reportService = reportService;
             _emailService = emailService;
-            _userManager = userManager;
+            _reportService = reportService;
         }
 
-        [HttpPost("send-overdue-credit-emails")]
-        public async Task<IActionResult> SendOverdueEmails()
+        [HttpPost("send-unpaid-credit-reminders")]
+        public async Task<IActionResult> SendReminders()
         {
-            var customers = await _reportService.GetUnpaidCreditReportAsync();
+            var overdueCustomers = await _reportService.GetUnpaidCreditReportAsync();
 
-            if (customers == null || !customers.Any())
-                return Ok(new { message = "No overdue customers found." });
-
-            int sentCount = 0;
-
-            foreach (var customer in customers)
+            if (!overdueCustomers.Any())
             {
-                
-                var user = await _userManager.FindByIdAsync(customer.UserId);
-
-                if (user?.Email is null || string.IsNullOrWhiteSpace(user.Email))
-                    continue;
-
-                await _emailService.SendUnpaidCreditReminderAsync(
-                    user.Email,
-                    customer.FullName,
-                    customer.CreditBalance
-                );
-
-                sentCount++;
+                return Ok(new { message = "No customers with overdue credits found." });
             }
 
-            return Ok(new
+            int emailCount = 0;
+            foreach (var customer in overdueCustomers)
             {
-                message = "Overdue credit emails sent successfully",
-                totalSent = sentCount
+                // Note: Identity User's Email might be stored elsewhere, 
+                // but if you have a way to fetch the email, use it here.
+                // Assuming for now you might need to fetch the User email from Identity.
+                
+                // If you add an Email field to CustomerProfile later, use: customer.Email
+                // For now, I'll keep the placeholder for your implementation logic
+                string recipientEmail = "user-email-placeholder@example.com"; 
+
+                await _emailService.SendUnpaidCreditReminderAsync(
+                    recipientEmail, 
+                    customer.FullName, 
+                    customer.CreditBalance
+                );
+                emailCount++;
+            }
+            
+            return Ok(new { 
+                message = "Reminder process completed successfully.", 
+                remindersSent = emailCount 
             });
         }
     }

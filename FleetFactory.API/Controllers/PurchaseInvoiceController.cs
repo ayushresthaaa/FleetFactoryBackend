@@ -70,5 +70,16 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpPatch("{id:guid}/cancel")]
+        public async Task<IActionResult> Cancel(Guid id)
+        {
+            var result = await _purchaseInvoiceService.CancelAsync(id);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
 }

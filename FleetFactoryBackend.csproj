@@ -9,6 +9,7 @@
   <ItemGroup>
 
     <!-- Swagger / OpenAPI -->
+    <PackageReference Include="CloudinaryDotNet" Version="1.29.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
 

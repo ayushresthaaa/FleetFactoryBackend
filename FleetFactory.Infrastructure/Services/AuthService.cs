@@ -1,5 +1,6 @@
 using FleetFactory.Application.Features.Auth.DTOs;
 using FleetFactory.Application.Interfaces.Services;
+using FleetFactory.Domain.Enums;
 using FleetFactory.Infrastructure.Identity;
 using FleetFactory.Infrastructure.Services;
 using FleetFactory.Shared.Results;
@@ -27,7 +28,7 @@ namespace FleetFactory.Infrastructure.Services
                 return ApiResponse<AuthResponseDto>.ErrorResponse(errors);
             }
 
-            var role = string.IsNullOrWhiteSpace(request.Role) ? "Customer" : request.Role;
+            var role = UserRole.Customer.ToString(); //default role for new users is customer
 
             await userManager.AddToRoleAsync(user, role); //adding the role specified by the user or fallback
 

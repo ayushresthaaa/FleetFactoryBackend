@@ -16,5 +16,7 @@ namespace FleetFactory.Application.Interfaces.Repositories
 
         //rabison part
         Task<List<CustomerProfile>> SearchAsync(string query);
+
+       
     }
 }

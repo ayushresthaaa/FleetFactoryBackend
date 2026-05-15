@@ -22,6 +22,42 @@ namespace FleetFactoryBackend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("FleetFactory.Domain.Entities.Appointment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("VehicleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("Appointments");
+                });
+
             modelBuilder.Entity("FleetFactory.Domain.Entities.CustomerProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -119,6 +155,12 @@ namespace FleetFactoryBackend.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<string>("ImagePublicId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -186,6 +228,47 @@ namespace FleetFactoryBackend.Migrations
                         .IsUnique();
 
                     b.ToTable("PartCategories");
+                });
+
+            modelBuilder.Entity("FleetFactory.Domain.Entities.PartRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PartName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("VehicleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("PartRequests");
                 });
 
             modelBuilder.Entity("FleetFactory.Domain.Entities.PurchaseInvoice", b =>
@@ -269,10 +352,42 @@ namespace FleetFactoryBackend.Migrations
                     b.ToTable("PurchaseInvoiceItems");
                 });
 
+            modelBuilder.Entity("FleetFactory.Domain.Entities.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("FleetFactory.Domain.Entities.SalesInvoice", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AppointmentId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -307,6 +422,13 @@ namespace FleetFactoryBackend.Migrations
                     b.Property<int?>("PaymentMethod")
                         .HasColumnType("integer");
 
+                    b.Property<decimal>("ServiceCharge")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
+                    b.Property<string>("ServiceDescription")
+                        .HasColumnType("text");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -325,6 +447,8 @@ namespace FleetFactoryBackend.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
 
                     b.HasIndex("CreatedById");
 
@@ -735,6 +859,24 @@ namespace FleetFactoryBackend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("FleetFactory.Domain.Entities.Appointment", b =>
+                {
+                    b.HasOne("FleetFactory.Domain.Entities.CustomerProfile", "Customer")
+                        .WithMany("Appointments")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FleetFactory.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("Appointments")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("FleetFactory.Domain.Entities.CustomerProfile", b =>
                 {
                     b.HasOne("FleetFactory.Infrastructure.Identity.ApplicationUser", null)
@@ -767,6 +909,24 @@ namespace FleetFactoryBackend.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("FleetFactory.Domain.Entities.PartRequest", b =>
+                {
+                    b.HasOne("FleetFactory.Domain.Entities.CustomerProfile", "Customer")
+                        .WithMany("PartRequests")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FleetFactory.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("PartRequests")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("FleetFactory.Domain.Entities.PurchaseInvoice", b =>
@@ -805,8 +965,24 @@ namespace FleetFactoryBackend.Migrations
                     b.Navigation("PurchaseInvoice");
                 });
 
+            modelBuilder.Entity("FleetFactory.Domain.Entities.Review", b =>
+                {
+                    b.HasOne("FleetFactory.Domain.Entities.CustomerProfile", "Customer")
+                        .WithMany("Reviews")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("FleetFactory.Domain.Entities.SalesInvoice", b =>
                 {
+                    b.HasOne("FleetFactory.Domain.Entities.Appointment", "Appointment")
+                        .WithMany("SalesInvoices")
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("FleetFactory.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany("CreatedSalesInvoices")
                         .HasForeignKey("CreatedById")
@@ -823,6 +999,8 @@ namespace FleetFactoryBackend.Migrations
                         .WithMany("SalesInvoices")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Appointment");
 
                     b.Navigation("Customer");
 
@@ -935,8 +1113,19 @@ namespace FleetFactoryBackend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("FleetFactory.Domain.Entities.Appointment", b =>
+                {
+                    b.Navigation("SalesInvoices");
+                });
+
             modelBuilder.Entity("FleetFactory.Domain.Entities.CustomerProfile", b =>
                 {
+                    b.Navigation("Appointments");
+
+                    b.Navigation("PartRequests");
+
+                    b.Navigation("Reviews");
+
                     b.Navigation("SalesInvoices");
 
                     b.Navigation("Vehicles");
@@ -968,6 +1157,10 @@ namespace FleetFactoryBackend.Migrations
 
             modelBuilder.Entity("FleetFactory.Domain.Entities.Vehicle", b =>
                 {
+                    b.Navigation("Appointments");
+
+                    b.Navigation("PartRequests");
+
                     b.Navigation("SalesInvoices");
                 });
 
