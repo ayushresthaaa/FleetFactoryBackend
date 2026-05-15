@@ -21,5 +21,12 @@ namespace FleetFactory.Application.Features.Auth.DTOs
         [Required]
         [MaxLength(50)]
         public string LastName { get; set; } = null!;
+
+        [Phone]
+        [MaxLength(20)]
+        public string? Phone { get; set; }
+
+        [MaxLength(200)]
+        public string? Address { get; set; }
     }
 }
