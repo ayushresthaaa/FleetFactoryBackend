@@ -87,5 +87,10 @@ namespace FleetFactory.Infrastructure.Repositories
                 .OrderBy(c => c.FullName)
                 .ToListAsync();
         }
+
+        //using Iqueryable is better than the ienumerable in here because 
+        //check iqueryable vs ienumerable
+
+        
     }
 }

@@ -8,7 +8,7 @@ using FleetFactory.Infrastructure.Identity;
 //register services and repositories
 using FleetFactory.API.Extensions;
 using FleetFactory.Infrastructure.Services; // for cache service and low stock
-
+using FleetFactory.Infrastructure.Config;
 //middleware
 using FleetFactory.API.Middleware;
 //seeders 
@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +26,34 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter JWT token only. Example: eyJhbGciOi..."
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Services.AddMemoryCache();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -33,10 +61,25 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 //configure DI for the services registration
 builder.Services.AddProjectServicesAndRepositories();
 
-
+//cloudinary 
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("Cloudinary"));
+    
 //application user setup for identity
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>()
@@ -77,6 +120,7 @@ builder.Services.AddAuthentication(
 builder.Services.AddHostedService<LowStockBackgroundService>();
 var app = builder.Build();
 
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -90,6 +134,9 @@ app.UseHttpsRedirection();
 
 //scheme means auth types, we will use JWT for our API
 //challenge -> if fails respond with rules of JWT
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
    
 app.UseAuthorization();

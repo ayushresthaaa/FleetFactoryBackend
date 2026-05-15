@@ -85,5 +85,63 @@ namespace FleetFactory.Infrastructure.Repositories
         {
             await _context.StockMovements.AddAsync(stockMovement);
         }
+
+         public async Task<(List<Part> Items, int TotalCount)> SearchAsync(
+            string keyword,
+            int pageNumber,
+            int pageSize)
+        {
+            keyword = keyword.ToLower();
+
+            var query = _context.Parts
+                .Include(p => p.Category)
+                .Include(p => p.Vendor)
+                .Where(p =>
+                    p.IsActive &&
+                    (
+                        p.Name.ToLower().Contains(keyword) ||
+                        p.Sku.ToLower().Contains(keyword) ||
+                        (p.Description != null && p.Description.ToLower().Contains(keyword))
+                    ))
+                .OrderBy(p => p.Name);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        public async Task<List<Part>> GetLowStockAsync(int threshold)
+        {
+            return await _context.Parts
+                .Include(p => p.Category)
+                .Include(p => p.Vendor)
+                .Where(p => p.IsActive && p.StockQty < threshold)
+                .OrderBy(p => p.StockQty)
+                .ToListAsync();
+        }
+
+        public async Task<List<Part>> GetAvailableAsync()
+        {
+            return await _context.Parts
+                .Include(p => p.Category)
+                .Include(p => p.Vendor)
+                .Where(p => p.IsActive && p.StockQty > 0)
+                .OrderBy(p => p.Name)
+                .ToListAsync();
+        }
+
+        public async Task<List<StockMovement>> GetStockMovementsAsync(Guid partId)
+        {
+            return await _context.StockMovements
+                .Include(s => s.Part)
+                .Where(s => s.PartId == partId)
+                .OrderByDescending(s => s.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

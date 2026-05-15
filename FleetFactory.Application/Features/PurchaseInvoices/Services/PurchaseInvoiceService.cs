@@ -7,7 +7,7 @@ using FleetFactory.Shared.Results;
 using FleetFactory.Infrastructure.Helpers;
 namespace FleetFactory.Application.Features.PurchaseInvoices.Services
 {
-    public class PurchaseInvoiceService(IPurchaseInvoiceRepository _purchaseInvoiceRepository, IPartRepository _partRepository): IPurchaseInvoiceService { 
+    public class PurchaseInvoiceService(IPurchaseInvoiceRepository _purchaseInvoiceRepository, IPartRepository _partRepository, IVendorRepository _vendorRepository): IPurchaseInvoiceService { 
         
         public async Task<ApiResponse<PagedResult<PurchaseInvoiceResponseDto>>> GetAllAsync(int pageNumber, int pageSize)
         {
@@ -89,6 +89,12 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
 
             if (invoiceExists)
                 return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse("Invoice number already exists");
+
+            var vendor = await _vendorRepository.GetByIdAsync(request.VendorId);
+
+            if (vendor == null)
+                return ApiResponse<PurchaseInvoiceResponseDto>
+                    .ErrorResponse("Vendor not found");
 
             var invoice = new PurchaseInvoice
             {
@@ -223,6 +229,27 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                 }
 
                 invoice.Status = InvoiceStatus.Received;
+                invoice.UpdatedAt = DateTimeHelper.UtcNow;
+
+                _purchaseInvoiceRepository.Update(invoice);
+                await _purchaseInvoiceRepository.SaveChangesAsync();
+
+                return await GetByIdAsync(id);
+            }
+
+            public async Task<ApiResponse<PurchaseInvoiceResponseDto>> CancelAsync(Guid id)
+            {
+                var invoice = await _purchaseInvoiceRepository.GetByIdAsync(id);
+
+                if (invoice == null)
+                    return ApiResponse<PurchaseInvoiceResponseDto>
+                        .ErrorResponse("Purchase invoice not found");
+
+                if (invoice.Status != InvoiceStatus.Pending)
+                    return ApiResponse<PurchaseInvoiceResponseDto>
+                        .ErrorResponse("Only pending invoices can be cancelled");
+
+                invoice.Status = InvoiceStatus.Cancelled;
                 invoice.UpdatedAt = DateTimeHelper.UtcNow;
 
                 _purchaseInvoiceRepository.Update(invoice);

@@ -34,7 +34,10 @@ namespace FleetFactory.Infrastructure.Persistence
         // notification domain
         public DbSet<Notification> Notifications => Set<Notification>();
 
-
+        //appointment domain and stuff related to part request and the review
+        public DbSet<Appointment> Appointments => Set<Appointment>();
+        public DbSet<PartRequest> PartRequests => Set<PartRequest>();
+        public DbSet<Review> Reviews => Set<Review>();
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -56,11 +59,11 @@ namespace FleetFactory.Infrastructure.Persistence
             
             //user - customerprofile
             builder.Entity<CustomerProfile>()
-                .HasOne<ApplicationUser>()
+                .HasOne(c => c.User)
                 .WithOne(u => u.CustomerProfile)
                 .HasForeignKey<CustomerProfile>(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+                
             //customerprofile - vehicle
             builder.Entity<Vehicle>()
                 .HasOne(v => v.Customer)
@@ -188,6 +191,42 @@ namespace FleetFactory.Infrastructure.Persistence
                 .HasIndex(s => s.InvoiceNo)
                 .IsUnique();
 
+            builder.Entity<SalesInvoice>()
+                .HasOne(s => s.Appointment)
+                .WithMany(a => a.SalesInvoices)
+                .HasForeignKey(s => s.AppointmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Appointment>()
+                .HasOne(a => a.Customer)
+                .WithMany(c => c.Appointments)
+                .HasForeignKey(a => a.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Appointment>()
+                .HasOne(a => a.Vehicle)
+                .WithMany(v => v.Appointments)
+                .HasForeignKey(a => a.VehicleId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<PartRequest>()
+                .HasOne(p => p.Customer)
+                .WithMany(c => c.PartRequests)
+                .HasForeignKey(p => p.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PartRequest>()
+                .HasOne(p => p.Vehicle)
+                .WithMany(v => v.PartRequests)
+                .HasForeignKey(p => p.VehicleId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Review>()
+                .HasOne(r => r.Customer)
+                .WithMany(c => c.Reviews)
+                .HasForeignKey(r => r.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             //precisoin required 
             builder.Entity<Part>(entity =>
             {
@@ -210,21 +249,31 @@ namespace FleetFactory.Infrastructure.Persistence
                 entity.Property(i => i.ActualUnitCost).HasPrecision(12, 2);
             });
 
-            builder.Entity<SalesInvoice>(entity =>
-            {
-                entity.Property(s => s.Subtotal).HasPrecision(12, 2);
-                entity.Property(s => s.DiscountPct).HasPrecision(5, 2);
-                entity.Property(s => s.TotalAmount).HasPrecision(12, 2);
-            });
+            // builder.Entity<SalesInvoice>(entity =>
+            // {
+            //     entity.Property(s => s.Subtotal).HasPrecision(12, 2);
+            //     entity.Property(s => s.DiscountPct).HasPrecision(5, 2);
+            //     entity.Property(s => s.TotalAmount).HasPrecision(12, 2);
+            // });
 
             builder.Entity<SalesInvoiceItem>()
                 .Property(i => i.UnitPrice)
                 .HasPrecision(12, 2);
 
+            builder.Entity<SalesInvoice>(entity =>
+                {
+                    entity.Property(s => s.Subtotal).HasPrecision(12, 2);
+                    entity.Property(s => s.DiscountPct).HasPrecision(5, 2);
+                    entity.Property(s => s.TotalAmount).HasPrecision(12, 2);
+                    entity.Property(s => s.ServiceCharge).HasPrecision(12, 2);
+                });
+
             //ignoring the computed property for DB
             builder.Entity<SalesInvoiceItem>()
                 .Ignore(i => i.Subtotal); 
             }  
+
+            
 
     }
 }

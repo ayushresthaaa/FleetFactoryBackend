@@ -14,5 +14,13 @@ namespace FleetFactory.Application.Interfaces.Services
         Task<ApiResponse<PartResponseDto>> UpdateAsync(Guid id, UpdatePartRequestDto request);
 
         Task<ApiResponse<string>> DeleteAsync(Guid id);
+
+        Task<ApiResponse<PagedResult<PartResponseDto>>> SearchAsync(string keyword, int pageNumber, int pageSize);
+
+        Task<ApiResponse<List<PartResponseDto>>> GetLowStockAsync(int threshold);
+
+        Task<ApiResponse<List<PartResponseDto>>> GetAvailableAsync();
+
+        Task<ApiResponse<List<StockMovementResponseDto>>> GetStockMovementsAsync(Guid partId);
     }
 }

@@ -33,7 +33,9 @@ namespace FleetFactory.Domain.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
+        //image with cloudinary, store the url and public id for deletion
+        public string? ImageUrl { get; set; }
+        public string? ImagePublicId { get; set; }
         // Navigation
         public PartCategory? Category { get; set; }
         public Vendor? Vendor { get; set; }
