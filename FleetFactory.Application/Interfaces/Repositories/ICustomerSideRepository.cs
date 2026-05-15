@@ -9,5 +9,11 @@ namespace FleetFactory.Application.Interfaces.Repositories
         Task<List<SalesInvoice>> GetPurchaseHistoryAsync(Guid customerId);
 
         Task<List<Appointment>> GetAppointmentHistoryAsync(Guid customerId);
+
+        Task<List<Appointment>> GetUpcomingAppointmentsAsync(Guid customerId);
+
+        Task<Appointment?> GetAppointmentByIdAsync(
+            Guid customerId,
+            Guid appointmentId);
     }
 }

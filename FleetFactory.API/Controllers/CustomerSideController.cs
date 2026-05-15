@@ -43,5 +43,41 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("me/upcoming-appointments")]
+        public async Task<IActionResult> GetMyUpcomingAppointments()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var result = await _customerSideService
+                .GetMyUpcomingAppointmentsAsync(userId);
+
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("me/appointments/{appointmentId:guid}")]
+        public async Task<IActionResult> GetMyAppointmentById(Guid appointmentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var result = await _customerSideService
+                .GetMyAppointmentByIdAsync(userId, appointmentId);
+
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
+        }
     }
 }

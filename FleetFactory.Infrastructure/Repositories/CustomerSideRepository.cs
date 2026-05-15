@@ -33,5 +33,25 @@ namespace FleetFactory.Infrastructure.Repositories
                 .OrderByDescending(a => a.ScheduledAt)
                 .ToListAsync();
         }
+        public async Task<List<Appointment>> GetUpcomingAppointmentsAsync(Guid customerId)
+        {
+            return await _context.Appointments
+                .Include(a => a.Vehicle)
+                .Where(a =>
+                    a.CustomerId == customerId &&
+                    a.ScheduledAt >= DateTime.UtcNow &&
+                    a.Status != FleetFactory.Domain.Enums.AppointmentStatus.Cancelled)
+                .OrderBy(a => a.ScheduledAt)
+                .ToListAsync();
+        }
+
+        public async Task<Appointment?> GetAppointmentByIdAsync(Guid customerId, Guid appointmentId)
+        {
+            return await _context.Appointments
+                .Include(a => a.Vehicle)
+                .FirstOrDefaultAsync(a =>
+                    a.Id == appointmentId &&
+                    a.CustomerId == customerId);
+        }
     }
 }

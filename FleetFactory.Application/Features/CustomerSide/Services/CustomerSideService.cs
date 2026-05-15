@@ -57,5 +57,60 @@ namespace FleetFactory.Application.Features.CustomerSide.Services
             return ApiResponse<List<CustomerAppointmentHistoryResponseDto>>
                 .SuccessResponse(response, "Appointment history retrieved successfully");
         }
+
+
+        public async Task<ApiResponse<List<CustomerAppointmentHistoryResponseDto>>>
+            GetMyUpcomingAppointmentsAsync(string userId)
+        {
+            var customer = await _customerSideRepository.GetCustomerByUserIdAsync(userId);
+
+            if (customer == null)
+                return ApiResponse<List<CustomerAppointmentHistoryResponseDto>>
+                    .ErrorResponse("Customer profile not found");
+
+            var appointments = await _customerSideRepository
+                .GetUpcomingAppointmentsAsync(customer.Id);
+
+            var response = appointments.Select(a => new CustomerAppointmentHistoryResponseDto
+            {
+                AppointmentId = a.Id,
+                VehicleNumber = a.Vehicle?.VehicleNumber,
+                ScheduledAt = a.ScheduledAt,
+                Status = a.Status.ToString(),
+                Notes = a.Notes
+            }).ToList();
+
+            return ApiResponse<List<CustomerAppointmentHistoryResponseDto>>
+                .SuccessResponse(response, "Upcoming appointments retrieved successfully");
+        }
+
+        public async Task<ApiResponse<CustomerAppointmentHistoryResponseDto>>
+            GetMyAppointmentByIdAsync(string userId, Guid appointmentId)
+        {
+            var customer = await _customerSideRepository.GetCustomerByUserIdAsync(userId);
+
+            if (customer == null)
+                return ApiResponse<CustomerAppointmentHistoryResponseDto>
+                    .ErrorResponse("Customer profile not found");
+
+            var appointment = await _customerSideRepository
+                .GetAppointmentByIdAsync(customer.Id, appointmentId);
+
+            if (appointment == null)
+                return ApiResponse<CustomerAppointmentHistoryResponseDto>
+                    .ErrorResponse("Appointment not found");
+
+            var response = new CustomerAppointmentHistoryResponseDto
+            {
+                AppointmentId = appointment.Id,
+                VehicleNumber = appointment.Vehicle?.VehicleNumber,
+                ScheduledAt = appointment.ScheduledAt,
+                Status = appointment.Status.ToString(),
+                Notes = appointment.Notes
+            };
+
+            return ApiResponse<CustomerAppointmentHistoryResponseDto>
+                .SuccessResponse(response, "Appointment retrieved successfully");
+        }
     }
 }
