@@ -9,52 +9,72 @@ namespace FleetFactory.Application.Features.Reports.Services
 {
     public class ReportService(IReportRepository _reportRepository) : IReportService
     {
-        public async Task<ApiResponse<FinancialReportResponseDTO>> GetFinancialReportAsync(string type)
+        public async Task<ApiResponse<FinancialReportResponseDTO>> GetFinancialReportAsync(string type, DateTime? fromDate = null,
+        DateTime? toDate = null)
         {
-            var now = DateTime.UtcNow;
-            var today = now.Date;
+        var now = DateTime.UtcNow;
+        DateTime start;
+        DateTime end = toDate ?? now;
 
-            DateTime fromDate;
+        switch (type.ToLower())
+        {
+            case "daily":
+                start = fromDate ?? now.Date;
+                break;
 
-            switch (type.ToLower())
-            {
-                case "daily":
-                    fromDate = today;
-                    break;
+            case "monthly":
+                start = fromDate ?? new DateTime(now.Year, now.Month, 1);
+                break;
 
-                case "weekly":
-                    fromDate = today.AddDays(-7);
-                    break;
+            case "yearly":
+                start = fromDate ?? new DateTime(now.Year, 1, 1);
+                break;
 
-                case "monthly":
-                    fromDate = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-                    break;
+            default:
+                start = fromDate ?? now.Date;
+                break;
+        }
 
-                case "yearly":
-                    fromDate = new DateTime(today.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                    break;
+            // var salesInvoices = await _reportRepository.GetSalesInvoicesByDateRangeAsync(fromDate, now);
+            // var purchaseInvoices = await _reportRepository.GetPurchaseInvoicesByDateRangeAsync(fromDate, now); 
+            var salesInvoices = await _reportRepository.GetSalesInvoicesByDateRangeAsync(start, end);
 
-                default:
-                    return ApiResponse<FinancialReportResponseDTO>
-                        .ErrorResponse("Invalid report type. Use daily, weekly, monthly, or yearly.");
-            }
+            var purchaseInvoices = await _reportRepository.GetPurchaseInvoicesByDateRangeAsync(start, end);
 
-            var salesInvoices = await _reportRepository.GetSalesInvoicesByDateRangeAsync(fromDate, now);
-            var purchaseInvoices = await _reportRepository.GetPurchaseInvoicesByDateRangeAsync(fromDate, now);
+            var items = await _reportRepository.GetSalesInvoiceItemsByDateRangeAsync(start, end);
 
+            var grouped = items
+                .GroupBy(i => i.Part.Name)
+                .Select(g => new
+                {
+                    Name = g.Key,
+                    Quantity = g.Sum(x => x.Quantity)
+                })
+                .ToList();
+
+            var highest = grouped.OrderByDescending(x => x.Quantity).FirstOrDefault();
+            var lowest = grouped.OrderBy(x => x.Quantity).FirstOrDefault();
+            
+            
             var totalSales = salesInvoices.Sum(s => s.TotalAmount);
             var totalPurchases = purchaseInvoices.Sum(p => p.TotalAmount);
 
             var response = new FinancialReportResponseDTO
             {
                 ReportType = type.ToLower(),
-                FromDate = fromDate,
-                ToDate = now,
+                FromDate = start,
+                ToDate = end,
                 TotalSales = totalSales,
                 TotalPurchases = totalPurchases,
                 NetProfit = totalSales - totalPurchases,
                 SalesInvoiceCount = salesInvoices.Count,
-                PurchaseInvoiceCount = purchaseInvoices.Count
+                PurchaseInvoiceCount = purchaseInvoices.Count,
+
+                HighestSoldItem = highest?.Name,
+                HighestSoldQuantity = highest?.Quantity ?? 0,
+
+                LowestSoldItem = lowest?.Name,
+                LowestSoldQuantity = lowest?.Quantity ?? 0,
             };
 
             return ApiResponse<FinancialReportResponseDTO>
@@ -72,6 +92,89 @@ namespace FleetFactory.Application.Features.Reports.Services
         public async Task<List<CustomerProfile>> GetCustomersWithCreditAsync()
         {
             return await _reportRepository.GetCustomersWithCreditAsync();
+        }
+
+        public async Task<List<CustomerReportResponseDTO>> GetRegularCustomersReportAsync(
+            DateTime? fromDate = null,
+            DateTime? toDate = null)
+        {
+            var start = fromDate ?? DateTime.UtcNow.AddMonths(-1);
+            var end = toDate ?? DateTime.UtcNow;
+
+            var invoices = await _reportRepository
+                .GetSalesInvoicesWithCustomersAsync(start, end);
+
+            var result = invoices
+                .GroupBy(i => i.Customer)
+                .Select(g => new CustomerReportResponseDTO
+                {
+                    CustomerId = g.Key.Id,
+                    FullName = g.Key.FullName,
+                    Phone = g.Key.Phone,
+                    CreditBalance = g.Key.CreditBalance,
+                    TotalSpent = g.Sum(x => x.TotalAmount),
+                    TotalInvoices = g.Count(),
+                    LastPurchaseDate = g.Max(x => x.CreatedAt)
+                })
+                .OrderByDescending(x => x.TotalInvoices)
+                .ToList();
+
+            return result;
+        }
+
+        public async Task<List<CustomerReportResponseDTO>> GetHighSpendersReportAsync(
+            DateTime? fromDate = null,
+            DateTime? toDate = null)
+        {
+            var start = fromDate ?? DateTime.UtcNow.AddMonths(-1);
+            var end = toDate ?? DateTime.UtcNow;
+
+            var invoices = await _reportRepository
+                .GetSalesInvoicesWithCustomersAsync(start, end);
+
+            var result = invoices
+                .GroupBy(i => i.Customer)
+                .Select(g => new CustomerReportResponseDTO
+                {
+                    CustomerId = g.Key.Id,
+                    FullName = g.Key.FullName,
+                    Phone = g.Key.Phone,
+                    CreditBalance = g.Key.CreditBalance,
+                    TotalSpent = g.Sum(x => x.TotalAmount),
+                    TotalInvoices = g.Count(),
+                    LastPurchaseDate = g.Max(x => x.CreatedAt)
+                })
+                .OrderByDescending(x => x.TotalSpent)
+                .ToList();
+
+            return result;
+        }
+
+        public async Task<List<CustomerReportResponseDTO>> GetPendingCreditCustomersReportAsync(
+            DateTime? fromDate = null,
+            DateTime? toDate = null)
+        {
+            var customers = await _reportRepository
+                .GetCustomersWithInvoicesAsync();
+
+            var result = customers
+                .Where(c => c.CreditBalance > 0)
+                .Select(c => new CustomerReportResponseDTO
+                {
+                    CustomerId = c.Id,
+                    FullName = c.FullName,
+                    Phone = c.Phone,
+                    CreditBalance = c.CreditBalance,
+                    TotalSpent = c.SalesInvoices.Sum(x => x.TotalAmount),
+                    TotalInvoices = c.SalesInvoices.Count,
+                    LastPurchaseDate = c.SalesInvoices.Any()
+                        ? c.SalesInvoices.Max(x => x.CreatedAt)
+                        : DateTime.MinValue
+                })
+                .OrderByDescending(x => x.CreditBalance)
+                .ToList();
+
+            return result;
         }
     }
 }

@@ -36,5 +36,32 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Where(c => c.CreditBalance > 0)
                 .ToListAsync();
         }
+
+        public async Task<List<SalesInvoiceItem>> GetSalesInvoiceItemsByDateRangeAsync(DateTime fromDate, DateTime toDate)
+        {
+            return await _context.SalesInvoiceItems
+                .Include(i => i.Part)
+                .Where(i => i.SalesInvoice.CreatedAt >= fromDate &&
+                            i.SalesInvoice.CreatedAt <= toDate)
+                .ToListAsync();
+        }
+
+        public async Task<List<SalesInvoice>> GetSalesInvoicesWithCustomersAsync(
+            DateTime fromDate,
+            DateTime toDate)
+        {
+            return await _context.SalesInvoices
+                .Include(s => s.Customer)
+                .Where(s => s.CreatedAt >= fromDate &&
+                            s.CreatedAt <= toDate)
+                .ToListAsync();
+        }
+
+        public async Task<List<CustomerProfile>> GetCustomersWithInvoicesAsync()
+        {
+            return await _context.CustomerProfiles
+                .Include(c => c.SalesInvoices)
+                .ToListAsync();
+        }
     }
 }

@@ -11,5 +11,13 @@ namespace FleetFactory.Application.Interfaces.Repositories
         Task<List<CustomerProfile>> GetOverdueCreditCustomersAsync(DateTime thresholdDate);
 
         Task<List<CustomerProfile>> GetCustomersWithCreditAsync();
+
+        Task<List<SalesInvoiceItem>> GetSalesInvoiceItemsByDateRangeAsync(DateTime fromDate, DateTime toDate);
+
+        Task<List<SalesInvoice>> GetSalesInvoicesWithCustomersAsync(
+            DateTime fromDate,
+            DateTime toDate);
+
+        Task<List<CustomerProfile>> GetCustomersWithInvoicesAsync();
     }
 }

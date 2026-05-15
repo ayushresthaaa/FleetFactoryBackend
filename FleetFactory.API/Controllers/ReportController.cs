@@ -8,9 +8,12 @@ namespace FleetFactory.API.Controllers
     public class ReportsController(IReportService _reportService) : ControllerBase
     {
         [HttpGet("financial")]
-        public async Task<IActionResult> GetFinancialReport([FromQuery] string type = "daily")
+        public async Task<IActionResult> GetFinancialReport(
+            [FromQuery] string type = "daily",
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
         {
-            var result = await _reportService.GetFinancialReportAsync(type);
+            var result = await _reportService.GetFinancialReportAsync(type, fromDate, toDate);
 
             if (!result.Success)
                 return BadRequest(result);
@@ -31,6 +34,39 @@ namespace FleetFactory.API.Controllers
         public async Task<IActionResult> GetCustomersWithCredit()
         {
             var result = await _reportService.GetCustomersWithCreditAsync();
+            return Ok(result);
+        }
+
+        [HttpGet("staff/regular-customers")]
+        public async Task<IActionResult> GetRegularCustomersReport(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            var result = await _reportService
+                .GetRegularCustomersReportAsync(fromDate, toDate);
+
+            return Ok(result);
+        }
+
+        [HttpGet("staff/high-spenders")]
+        public async Task<IActionResult> GetHighSpendersReport(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            var result = await _reportService
+                .GetHighSpendersReportAsync(fromDate, toDate);
+
+            return Ok(result);
+        }
+
+        [HttpGet("staff/pending-credits")]
+        public async Task<IActionResult> GetPendingCreditCustomersReport(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            var result = await _reportService
+                .GetPendingCreditCustomersReportAsync(fromDate, toDate);
+
             return Ok(result);
         }
     }

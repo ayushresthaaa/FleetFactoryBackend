@@ -17,5 +17,11 @@ namespace FleetFactory.Application.Features.Reports.DTOs
         public int SalesInvoiceCount { get; set; }
 
         public int PurchaseInvoiceCount { get; set; }
+
+        public string? HighestSoldItem { get; set; }
+        public int HighestSoldQuantity { get; set; }
+
+        public string? LowestSoldItem { get; set; }
+        public int LowestSoldQuantity { get; set; }
     }
 }
