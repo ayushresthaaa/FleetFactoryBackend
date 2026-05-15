@@ -5,7 +5,10 @@ namespace FleetFactory.Application.Interfaces.Services
 {
     public interface ICustomerSideService
     {
-        Task<ApiResponse<List<CustomerPurchaseHistoryResponseDto>>> 
-            GetPurchaseHistoryAsync(Guid customerId);
+        Task<ApiResponse<List<CustomerPurchaseHistoryResponseDto>>>
+            GetMyPurchaseHistoryAsync(string userId);
+
+        Task<ApiResponse<List<CustomerAppointmentHistoryResponseDto>>>
+            GetMyAppointmentHistoryAsync(string userId);
     }
 }
