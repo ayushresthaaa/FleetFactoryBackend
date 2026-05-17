@@ -85,21 +85,18 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
             if (request.Items == null || request.Items.Count == 0)
                 return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse("Invoice must contain at least one item");
 
-            var invoiceExists = await _purchaseInvoiceRepository.ExistsByInvoiceNoAsync(request.InvoiceNo); //checks if invoice exists with same no
-
-            if (invoiceExists)
-                return ApiResponse<PurchaseInvoiceResponseDto>.ErrorResponse("Invoice number already exists");
-
             var vendor = await _vendorRepository.GetByIdAsync(request.VendorId);
 
             if (vendor == null)
                 return ApiResponse<PurchaseInvoiceResponseDto>
                     .ErrorResponse("Vendor not found");
 
+            var invoiceNo = $"PINV-{DateTimeHelper.UtcNow:yyyyMMddHHmmss}";
+
             var invoice = new PurchaseInvoice
             {
                 VendorId = request.VendorId,
-                InvoiceNo = request.InvoiceNo.Trim(),
+                InvoiceNo = invoiceNo,
                 CreatedById = createdById,
                 Status = InvoiceStatus.Pending,
                 CreatedAt = DateTimeHelper.UtcNow,
@@ -256,6 +253,54 @@ namespace FleetFactory.Application.Features.PurchaseInvoices.Services
                 await _purchaseInvoiceRepository.SaveChangesAsync();
 
                 return await GetByIdAsync(id);
+            }
+
+            public async Task<ApiResponse<PagedResult<PurchaseInvoiceResponseDto>>> SearchAsync(
+                string? query,
+                InvoiceStatus? status,
+                int pageNumber,
+                int pageSize)
+            {
+                pageNumber = pageNumber < 1 ? 1 : pageNumber;
+                pageSize = pageSize < 1 ? 10 : pageSize;
+
+                var (invoices, totalCount) = await _purchaseInvoiceRepository.SearchAsync(
+                    query,
+                    status,
+                    pageNumber,
+                    pageSize
+                );
+
+                var response = invoices.Select(invoice => new PurchaseInvoiceResponseDto
+                {
+                    Id = invoice.Id,
+                    InvoiceNo = invoice.InvoiceNo,
+                    VendorId = invoice.VendorId,
+                    VendorName = invoice.Vendor?.Name ?? "",
+                    TotalAmount = invoice.TotalAmount,
+                    Status = invoice.Status.ToString(),
+                    CreatedAt = invoice.CreatedAt,
+
+                    Items = invoice.Items.Select(i => new PurchaseInvoiceItemResponseDto
+                    {
+                        Id = i.Id,
+                        PartId = i.PartId,
+                        PartName = i.Part?.Name ?? "",
+                        Quantity = i.Quantity,
+                        UnitCost = i.UnitCost,
+                        Subtotal = i.Quantity * i.UnitCost
+                    }).ToList()
+                }).ToList();
+
+                var pagedResult = PagedResult<PurchaseInvoiceResponseDto>.Create(
+                    response,
+                    pageNumber,
+                    pageSize,
+                    totalCount
+                );
+
+                return ApiResponse<PagedResult<PurchaseInvoiceResponseDto>>
+                    .SuccessResponse(pagedResult, "Purchase invoices searched successfully");
             }
     }
 }

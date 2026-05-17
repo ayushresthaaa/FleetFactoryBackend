@@ -32,6 +32,18 @@ namespace FleetFactory.Application.Interfaces.Repositories
 
         Task<List<StockMovement>> GetStockMovementsAsync(Guid partId);
 
+        Task<(List<Part> Items, int TotalCount)> GetByVendorAsync(
+            Guid vendorId,
+            int pageNumber,
+            int pageSize
+        );
+
+        Task<(List<Part> Items, int TotalCount)> GetByCategoryAsync(
+            Guid categoryId,
+            int pageNumber,
+            int pageSize
+        );
+
         Task SaveChangesAsync();
     }
 }

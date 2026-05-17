@@ -103,5 +103,33 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("vendor/{vendorId:guid}")]
+        public async Task<IActionResult> GetByVendor(
+            Guid vendorId,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _partService.GetByVendorAsync(
+                vendorId,
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
+        }
+
+        [HttpGet("category/{categoryId:guid}")]
+        public async Task<IActionResult> GetByCategory(
+            Guid categoryId,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _partService.GetByCategoryAsync(
+                categoryId,
+                pageNumber,
+                pageSize);
+
+            return Ok(result);
+        }
     }
 }

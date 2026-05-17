@@ -143,5 +143,50 @@ namespace FleetFactory.Infrastructure.Repositories
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<(List<Part> Items, int TotalCount)> GetByVendorAsync(
+            Guid vendorId,
+            int pageNumber,
+            int pageSize)
+        {
+            var query = _context.Parts
+                .Include(p => p.Category)
+                .Include(p => p.Vendor)
+                .Where(p => p.IsActive && p.VendorId == vendorId)
+                .OrderBy(p => p.Name);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        public async Task<(List<Part> Items, int TotalCount)> GetByCategoryAsync(
+            Guid categoryId,
+            int pageNumber,
+            int pageSize)
+        {
+            var query = _context.Parts
+                .Include(p => p.Category)
+                .Include(p => p.Vendor)
+                .Where(p =>
+                    p.IsActive &&
+                    p.CategoryId == categoryId)
+                .OrderBy(p => p.Name);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
     }
 }

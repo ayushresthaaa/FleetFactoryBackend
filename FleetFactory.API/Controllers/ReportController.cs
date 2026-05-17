@@ -16,7 +16,7 @@ namespace FleetFactory.API.Controllers
                 return BadRequest(result);
 
             return Ok(result);
-        }
+        } 
 
          // Customers with overdue / unpaid credit (30+ days logic in service)
         [HttpGet("credit/unpaid")]
