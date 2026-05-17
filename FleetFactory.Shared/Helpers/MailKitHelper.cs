@@ -1,29 +1,60 @@
 using MailKit.Net.Smtp;
 using MimeKit;
+using Microsoft.Extensions.Configuration;
 
 namespace FleetFactory.Infrastructure.Helpers
 {
-    
-    public static class MailKitHelper 
+    public class MailKitHelper
     {
-        private static readonly string _smtpServer = "your-smtp-server.com";
-        private static readonly int _port = 587;
-        private static readonly string _username = "your-email@domain.com";
-        private static readonly string _password = "your-password";
+        private readonly IConfiguration _configuration;
 
-        public static async Task SendEmailAsync(string toEmail, string subject, string body)
+        public MailKitHelper(IConfiguration configuration)
         {
+            _configuration = configuration;
+        }
+
+        public async Task SendEmailAsync(
+            string toEmail,
+            string subject,
+            string body)
+        {
+            var smtpServer = _configuration["EmailSettings:SmtpServer"];
+            var port = int.Parse(_configuration["EmailSettings:Port"]!);
+            var username = _configuration["EmailSettings:Username"];
+            var password = _configuration["EmailSettings:Password"];
+
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Fleet Factory", _username));
-            message.To.Add(new MailboxAddress("", toEmail));
+
+            message.From.Add(
+                new MailboxAddress("Fleet Factory", username)
+            );
+
+            message.To.Add(
+                MailboxAddress.Parse(toEmail)
+            );
+
             message.Subject = subject;
 
-            message.Body = new TextPart("html") { Text = body };
+            message.Body = new TextPart("html")
+            {
+                Text = body
+            };
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(_smtpServer, _port, MailKit.Security.SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_username, _password);
+
+            await client.ConnectAsync(
+                smtpServer,
+                port,
+                MailKit.Security.SecureSocketOptions.StartTls
+            );
+
+            await client.AuthenticateAsync(
+                username,
+                password
+            );
+
             await client.SendAsync(message);
+
             await client.DisconnectAsync(true);
         }
     }

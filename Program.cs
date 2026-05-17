@@ -17,6 +17,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
+//helper 
+using FleetFactory.Infrastructure.Helpers;
+
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +58,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddMemoryCache();
+
+builder.Services.AddScoped<MailKitHelper>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
