@@ -82,7 +82,7 @@ namespace FleetFactory.Application.Features.Customers.Services
             {
                 Id = c.Id,
                 UserId = c.UserId,
-                Email = "", // can fill later if needed
+                Email = c.User?.Email ?? "",
                 FullName = c.FullName,
                 Phone = c.Phone,
                 Address = c.Address,

@@ -42,8 +42,11 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ILowStockService, LowStockService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IPartCategoryService, PartCategoryService>();
+
+            //rabison services
             services.AddScoped<ICustomerLookupService, CustomerLookupService>();
-            
+            services.AddScoped<ISendInvoiceEmailService, SendInvoiceEmailService>();
+
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
