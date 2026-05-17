@@ -22,5 +22,7 @@ namespace FleetFactory.Application.Interfaces.Services
         Task<ApiResponse<List<PartResponseDto>>> GetAvailableAsync();
 
         Task<ApiResponse<List<StockMovementResponseDto>>> GetStockMovementsAsync(Guid partId);
+        Task<ApiResponse<PagedResult<PartResponseDto>>> GetByVendorAsync(Guid vendorId, int pageNumber, int pageSize);
+        Task<ApiResponse<PagedResult<PartResponseDto>>> GetByCategoryAsync(Guid categoryId, int pageNumber, int pageSize);
     }
 }

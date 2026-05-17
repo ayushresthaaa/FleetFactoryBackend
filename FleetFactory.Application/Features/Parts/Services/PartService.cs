@@ -328,5 +328,91 @@ namespace FleetFactory.Application.Features.Parts.Services
             return ApiResponse<PagedResult<PartResponseDto>>
                 .SuccessResponse(pagedResult, "Search successful");
         }
+
+        //get by vendor 
+
+        public async Task<ApiResponse<PagedResult<PartResponseDto>>> GetByVendorAsync(
+            Guid vendorId,
+            int pageNumber,
+            int pageSize)
+        {
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            var (parts, totalCount) = await _partRepository.GetByVendorAsync(
+                vendorId,
+                pageNumber,
+                pageSize);
+
+            var response = parts.Select(p => new PartResponseDto
+            {
+                Id = p.Id,
+                Sku = p.Sku,
+                Name = p.Name,
+                Description = p.Description,
+                UnitPrice = p.UnitPrice,
+                CostPrice = p.CostPrice,
+                StockQty = p.StockQty,
+                IsActive = p.IsActive,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category?.Name,
+                VendorId = p.VendorId,
+                VendorName = p.Vendor?.Name,
+                CreatedAt = p.CreatedAt,
+                ImageUrl = p.ImageUrl,
+                ImagePublicId = p.ImagePublicId
+            }).ToList();
+
+            var pagedResult = PagedResult<PartResponseDto>.Create(
+                response,
+                pageNumber,
+                pageSize,
+                totalCount);
+
+            return ApiResponse<PagedResult<PartResponseDto>>
+                .SuccessResponse(pagedResult, "Parts filtered by vendor successfully");
+        }
+
+        public async Task<ApiResponse<PagedResult<PartResponseDto>>> GetByCategoryAsync(
+            Guid categoryId,
+            int pageNumber,
+            int pageSize)
+        {
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            var (parts, totalCount) = await _partRepository.GetByCategoryAsync(
+                categoryId,
+                pageNumber,
+                pageSize);
+
+            var response = parts.Select(p => new PartResponseDto
+            {
+                Id = p.Id,
+                Sku = p.Sku,
+                Name = p.Name,
+                Description = p.Description,
+                UnitPrice = p.UnitPrice,
+                CostPrice = p.CostPrice,
+                StockQty = p.StockQty,
+                IsActive = p.IsActive,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category?.Name,
+                VendorId = p.VendorId,
+                VendorName = p.Vendor?.Name,
+                CreatedAt = p.CreatedAt,
+                ImageUrl = p.ImageUrl,
+                ImagePublicId = p.ImagePublicId
+            }).ToList();
+
+            var pagedResult = PagedResult<PartResponseDto>.Create(
+                response,
+                pageNumber,
+                pageSize,
+                totalCount);
+
+            return ApiResponse<PagedResult<PartResponseDto>>
+                .SuccessResponse(pagedResult, "Parts filtered by category successfully");
+        }
     }
 }
