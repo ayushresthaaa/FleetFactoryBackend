@@ -13,6 +13,7 @@ namespace FleetFactory.Infrastructure.Repositories
         {
             var query = _context.CustomerProfiles
                 .Include(c => c.Vehicles)
+                .Include(c => c.User)
                 .OrderBy(c => c.FullName);
 
             var totalCount = await query.CountAsync();

@@ -7,7 +7,7 @@ namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SalesInvoiceController(ISalesInvoiceService _salesInvoiceService) : ControllerBase
+    public class SalesInvoiceController(ISalesInvoiceService _salesInvoiceService, ISendInvoiceEmailService _sendInvoiceEmailService) : ControllerBase
     {
         [HttpGet]
         public async Task<IActionResult> GetAll(
@@ -93,6 +93,19 @@ namespace FleetFactory.API.Controllers
 
             if (!result.Success)
                 return NotFound(result);
+
+            return Ok(result);
+        }
+
+        //rabison : to send sales invoice email to customer
+        [HttpPost("{id:guid}/send-email")]
+            public async Task<IActionResult> SendInvoiceEmail(Guid id)
+        {
+            var result = await _sendInvoiceEmailService
+                .SendSalesInvoiceEmailAsync(id);
+
+            if (!result.Success)
+                return BadRequest(result);
 
             return Ok(result);
         }

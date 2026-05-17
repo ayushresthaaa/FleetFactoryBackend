@@ -27,10 +27,11 @@ namespace FleetFactory.Infrastructure.Repositories
             return (items, totalCount);
         }
 
-        public async Task<SalesInvoice?> GetByIdAsync(Guid id)
+       public async Task<SalesInvoice?> GetByIdAsync(Guid id)
         {
             return await _context.SalesInvoices
                 .Include(s => s.Customer)
+                    .ThenInclude(c => c.User)
                 .Include(s => s.Vehicle)
                 .Include(s => s.Appointment)
                 .Include(s => s.Items)
