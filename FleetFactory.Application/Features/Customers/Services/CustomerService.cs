@@ -208,10 +208,9 @@ namespace FleetFactory.Application.Features.Customers.Services
                 CreatedAt = s.CreatedAt
             }).ToList(),
 
-            AppointmentHistory = customer.Appointments.Select(a => new CustomerAppointmentHistoryDTO
+            AppointmentHistory = customer.Appointments.Select(a => new CustomerAppointmentHistoryStaffSideDTO
             {
                 AppointmentId = a.Id,
-                VehicleId = a.VehicleId,
                 VehicleNumber = a.Vehicle != null ? a.Vehicle.VehicleNumber : null,
                 ScheduledAt = a.ScheduledAt,
                 Status = a.Status,
