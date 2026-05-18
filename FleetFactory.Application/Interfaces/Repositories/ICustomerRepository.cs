@@ -11,7 +11,7 @@ namespace FleetFactory.Application.Interfaces.Repositories
         Task SaveChangesAsync();
         Task AddVehicleAsync(Vehicle vehicle);
 
-        //added by rachina
+        //rabison part
         Task<CustomerProfile?> GetWithHistoryAsync(Guid id);
 
         //rabison part
