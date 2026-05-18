@@ -143,5 +143,35 @@ namespace FleetFactory.Application.Features.Appointments.Services
                 CreatedAt = appointment.CreatedAt
             };
         }
+
+
+        public async Task<ApiResponse<PagedResult<AppointmentResponseDTO>>> SearchAsync(
+            string? query,
+            AppointmentStatus? status,
+            int pageNumber,
+            int pageSize)
+        {
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            var (appointments, totalCount) =
+                await _appointmentRepository.SearchAsync(
+                    query,
+                    status,
+                    pageNumber,
+                    pageSize);
+
+            var response = appointments.Select(MapToResponse).ToList();
+
+            var paged = PagedResult<AppointmentResponseDTO>.Create(
+                response,
+                pageNumber,
+                pageSize,
+                totalCount
+            );
+
+            return ApiResponse<PagedResult<AppointmentResponseDTO>>
+                .SuccessResponse(paged, "Appointment search completed");
+        }
     }
 }
