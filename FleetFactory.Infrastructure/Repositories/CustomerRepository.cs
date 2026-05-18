@@ -64,9 +64,14 @@ namespace FleetFactory.Infrastructure.Repositories
         {
             return await _context.CustomerProfiles
                 .Include(c => c.Vehicles)
+
                 .Include(c => c.SalesInvoices)
                     .ThenInclude(s => s.Items)
                         .ThenInclude(i => i.Part)
+
+                .Include(c => c.Appointments)
+                    .ThenInclude(a => a.Vehicle)
+
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
