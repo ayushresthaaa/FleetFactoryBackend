@@ -179,35 +179,45 @@ namespace FleetFactory.Application.Features.Customers.Services
             if (customer == null)
                 return ApiResponse<CustomerHistoryResponseDTO>.ErrorResponse("Customer not found");
 
-            var response = new CustomerHistoryResponseDTO
+        var response = new CustomerHistoryResponseDTO
+        {
+            CustomerId = customer.Id,
+            UserId = customer.UserId,
+            FullName = customer.FullName,
+            Phone = customer.Phone,
+            Address = customer.Address,
+            CreditBalance = customer.CreditBalance,
+
+            Vehicles = customer.Vehicles.Select(v => new VehicleResponseDto
             {
-                CustomerId = customer.Id,
-                UserId = customer.UserId,
-                FullName = customer.FullName,
-                Phone = customer.Phone,
-                Address = customer.Address,
-                CreditBalance = customer.CreditBalance,
+                Id = v.Id,
+                VehicleNumber = v.VehicleNumber,
+                Make = v.Make,
+                Model = v.Model,
+                Year = v.Year
+            }).ToList(),
 
-                Vehicles = customer.Vehicles.Select(v => new VehicleResponseDto
-                {
-                    Id = v.Id,
-                    VehicleNumber = v.VehicleNumber,
-                    Make = v.Make,
-                    Model = v.Model,
-                    Year = v.Year
-                }).ToList(),
+            PurchaseHistory = customer.SalesInvoices.Select(s => new CustomerSalesInvoiceHistoryDTO
+            {
+                SalesInvoiceId = s.Id,
+                InvoiceNo = s.InvoiceNo,
+                Status = s.Status,
+                Subtotal = s.Subtotal,
+                DiscountPct = s.DiscountPct,
+                TotalAmount = s.TotalAmount,
+                CreatedAt = s.CreatedAt
+            }).ToList(),
 
-                PurchaseHistory = customer.SalesInvoices.Select(s => new CustomerSalesInvoiceHistoryDTO
-                {
-                    SalesInvoiceId = s.Id,
-                    InvoiceNo = s.InvoiceNo,
-                    Status = s.Status,
-                    Subtotal = s.Subtotal,
-                    DiscountPct = s.DiscountPct,
-                    TotalAmount = s.TotalAmount,
-                    CreatedAt = s.CreatedAt
-                }).ToList()
-            };
+            AppointmentHistory = customer.Appointments.Select(a => new CustomerAppointmentHistoryDTO
+            {
+                AppointmentId = a.Id,
+                VehicleId = a.VehicleId,
+                VehicleNumber = a.Vehicle != null ? a.Vehicle.VehicleNumber : null,
+                ScheduledAt = a.ScheduledAt,
+                Status = a.Status,
+                Notes = a.Notes
+            }).ToList()
+        };
 
             return ApiResponse<CustomerHistoryResponseDTO>
                 .SuccessResponse(response, "Customer history retrieved successfully");
