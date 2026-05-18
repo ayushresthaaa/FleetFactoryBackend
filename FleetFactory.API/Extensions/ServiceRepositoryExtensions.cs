@@ -17,7 +17,7 @@ using FleetFactory.Application.Features.Reports.Services;
 using FleetFactory.Application.Features.SalesInvoices.Services;
 using FleetFactory.Application.Features.PartCategories.Services;
 using FleetFactory.Application.Features.CustomerLookup.Services; 
-
+using FleetFactory.Application.Features.CustomerProfileManagement.Services;
 namespace FleetFactory.API.Extensions
 {
     public static class ServiceRepositoryExtensions
@@ -42,10 +42,9 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ILowStockService, LowStockService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IPartCategoryService, PartCategoryService>();
-
-            //rabison services
             services.AddScoped<ICustomerLookupService, CustomerLookupService>();
             services.AddScoped<ISendInvoiceEmailService, SendInvoiceEmailService>();
+            services.AddScoped<ICustomerProfileService, CustomerProfileService>();
 
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
@@ -59,7 +58,7 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IPartCategoryRepository, PartCategoryRepository>();
             services.AddScoped<ICustomerLookupRepository, CustomerLookupRepository>();
-            
+            services.AddScoped<ICustomerProfileRepository, CustomerProfileRepository>();
             return services;
         }
     }
