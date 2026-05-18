@@ -3,6 +3,7 @@ using FleetFactory.Application.Features.Appointments.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FleetFactory.Domain.Enums;
 
 namespace FleetFactory.API.Controllers
 {
@@ -78,6 +79,23 @@ namespace FleetFactory.API.Controllers
 
             if (!result.Success)
                 return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("search")]
+        // [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> Search(
+            [FromQuery] string? query,
+            [FromQuery] AppointmentStatus? status,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _appointmentService.SearchAsync(
+                query,
+                status,
+                pageNumber,
+                pageSize);
 
             return Ok(result);
         }

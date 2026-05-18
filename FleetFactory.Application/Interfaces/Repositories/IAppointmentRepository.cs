@@ -1,5 +1,5 @@
 using FleetFactory.Domain.Entities;
-
+using FleetFactory.Domain.Enums;
 namespace FleetFactory.Application.Interfaces.Repositories
 {
     public interface IAppointmentRepository
@@ -15,5 +15,10 @@ namespace FleetFactory.Application.Interfaces.Repositories
         void Update(Appointment appointment);
 
         Task SaveChangesAsync();
+        Task<(List<Appointment> Appointments, int TotalCount)> SearchAsync(
+            string? query,
+            AppointmentStatus? status,
+            int pageNumber,
+            int pageSize);
     }
 }

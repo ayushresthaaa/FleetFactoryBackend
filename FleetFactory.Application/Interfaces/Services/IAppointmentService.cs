@@ -1,6 +1,6 @@
 using FleetFactory.Application.Features.Appointments.DTOs;
 using FleetFactory.Shared.Results;
-
+using FleetFactory.Domain.Enums;
 namespace FleetFactory.Application.Interfaces.Services
 {
     public interface IAppointmentService
@@ -18,5 +18,11 @@ namespace FleetFactory.Application.Interfaces.Services
         Task<ApiResponse<AppointmentResponseDTO>> ConfirmAsync(Guid id);
 
         Task<ApiResponse<AppointmentResponseDTO>> CancelAsync(Guid id);
+        
+        Task<ApiResponse<PagedResult<AppointmentResponseDTO>>> SearchAsync(
+            string? query,
+            AppointmentStatus? status,
+            int pageNumber,
+            int pageSize);
     }
 }
