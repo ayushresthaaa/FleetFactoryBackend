@@ -80,5 +80,42 @@ namespace FleetFactory.Infrastructure.Services
                 body
             );
         }
+
+        //part request sourced email rachina
+        public async Task SendPartRequestSourcedEmailAsync(
+            string customerEmail,
+            string customerName,
+            string partName)
+        {
+            string subject = $"Requested Part Available - {partName}";
+
+            string body = $@"
+                <h2>Requested Part Available</h2>
+
+                <p>Hello {customerName},</p>
+
+                <p>
+                    The part you requested:
+                    <b>{partName}</b>
+                    is now available at Fleet Factory.
+                </p>
+
+                <p>
+                    Please visit our store for further details.
+                </p>
+
+                <br/>
+
+                <p>
+                    Sent via Fleet Factory System:
+                    {DateTimeHelper.NepalNow}
+                </p>";
+
+            await _mailKitHelper.SendEmailAsync(
+                customerEmail,
+                subject,
+                body
+            );
+        }
     }
 }
