@@ -21,6 +21,8 @@ using FleetFactory.Application.Features.CustomerProfileManagement.Services;
 using FleetFactory.Application.Features.Appointments.Services;
 using FleetFactory.Application.Features.PartRequests.Services;
 using FleetFactory.Application.Features.Reviews.Services;
+using FleetFactory.Application.Features.OverdueCredits.Services;
+
 namespace FleetFactory.API.Extensions
 {
     public static class ServiceRepositoryExtensions
@@ -51,6 +53,7 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddScoped<IPartRequestService, PartRequestService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IOverdueCreditService, OverdueCreditService>();
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
@@ -67,6 +70,7 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IPartRequestRepository, PartRequestRepository>();
             services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<IOverdueCreditRepository, OverdueCreditRepository>();
             return services;
         }
     }

@@ -4,8 +4,7 @@ namespace FleetFactory.Application.Interfaces.Services
 {
     public interface IEmailService
     {
-        Task SendUnpaidCreditReminderAsync(string customerEmail, string customerName, decimal amount);
-
+  
         Task SendSalesInvoiceAsync(
             string customerEmail,
             string customerName,
@@ -28,5 +27,10 @@ namespace FleetFactory.Application.Interfaces.Services
             int stockQty,
             int threshold);
         
+        Task SendOverdueCreditReminderEmailAsync(
+            string email,
+            string customerName,
+            decimal creditBalance
+        );
     }
 }
