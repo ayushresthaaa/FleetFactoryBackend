@@ -7,10 +7,14 @@ namespace FleetFactory.Infrastructure.Repositories
 {
     public class LowStockRepository(AppDbContext _context) : ILowStockRepository
     {
-        public async Task<List<Part>> GetLowStockPartsAsync(int threshold)
+        public async Task<List<Part>> GetLowStockPartsAsync()
         {
             return await _context.Parts
-                .Where(p => p.IsActive && p.StockQty < threshold)
+                .Include(p => p.Category)
+                .Where(p =>
+                    p.IsActive &&
+                    p.Category != null &&
+                    p.StockQty < p.Category.LowStockThreshold)
                 .OrderBy(p => p.StockQty)
                 .ToListAsync();
         }

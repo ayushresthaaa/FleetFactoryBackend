@@ -5,7 +5,7 @@ namespace FleetFactory.Application.Interfaces.Services
 {
     public interface ILowStockService
     {
-        Task<ApiResponse<List<LowStockNotificationResponseDTO>>> 
-            CheckLowStockAsync(int threshold = 10);
+        Task<ApiResponse<List<LowStockNotificationResponseDTO>>>
+            CheckLowStockAsync();
     }
 }

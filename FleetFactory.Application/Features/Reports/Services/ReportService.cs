@@ -2,76 +2,201 @@ using FleetFactory.Application.Features.Reports.DTOs;
 using FleetFactory.Application.Interfaces.Repositories;
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Shared.Results;
-using FleetFactory.Domain.Entities; 
-using FleetFactory.Infrastructure.Helpers;
 
 namespace FleetFactory.Application.Features.Reports.Services
 {
     public class ReportService(IReportRepository _reportRepository) : IReportService
     {
-        public async Task<ApiResponse<FinancialReportResponseDTO>> GetFinancialReportAsync(string type)
+        public async Task<ApiResponse<DashboardDTO>> GetAdminDashboardAsync()
         {
-            var now = DateTime.UtcNow;
-            var today = now.Date;
+            var result = await _reportRepository.GetAdminDashboardAsync();
 
-            DateTime fromDate;
+            return ApiResponse<DashboardDTO>
+                .SuccessResponse(result, "Admin dashboard loaded successfully");
+        }
 
-            switch (type.ToLower())
+        public async Task<ApiResponse<DashboardDTO>> GetStaffDashboardAsync()
+        {
+            var result = await _reportRepository.GetStaffDashboardAsync();
+
+            return ApiResponse<DashboardDTO>
+                .SuccessResponse(result, "Staff dashboard loaded successfully");
+        }
+
+        public async Task<ApiResponse<FinancialSummaryDTO>> GetFinancialSummaryAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRange(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetFinancialSummaryAsync(fromDate, toDate);
+
+            return ApiResponse<FinancialSummaryDTO>
+                .SuccessResponse(result, "Financial summary generated successfully");
+        }
+
+        public async Task<ApiResponse<List<ChartPointDTO>>> GetRevenueTrendAsync(
+            DateTime fromDate,
+            DateTime toDate,
+            string groupBy
+        )
+        {
+            var validation = ValidateDateRangeForList<ChartPointDTO>(fromDate, toDate);
+            if (validation != null) return validation;
+
+            groupBy = groupBy.ToLower();
+
+            if (groupBy != "day" && groupBy != "month")
             {
-                case "daily":
-                    fromDate = today;
-                    break;
-
-                case "weekly":
-                    fromDate = today.AddDays(-7);
-                    break;
-
-                case "monthly":
-                    fromDate = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-                    break;
-
-                case "yearly":
-                    fromDate = new DateTime(today.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                    break;
-
-                default:
-                    return ApiResponse<FinancialReportResponseDTO>
-                        .ErrorResponse("Invalid report type. Use daily, weekly, monthly, or yearly.");
+                return ApiResponse<List<ChartPointDTO>>
+                    .ErrorResponse("Invalid groupBy. Use 'day' or 'month'.");
             }
 
-            var salesInvoices = await _reportRepository.GetSalesInvoicesByDateRangeAsync(fromDate, now);
-            var purchaseInvoices = await _reportRepository.GetPurchaseInvoicesByDateRangeAsync(fromDate, now);
+            var result = await _reportRepository.GetRevenueTrendAsync(fromDate, toDate, groupBy);
 
-            var totalSales = salesInvoices.Sum(s => s.TotalAmount);
-            var totalPurchases = purchaseInvoices.Sum(p => p.TotalAmount);
+            return ApiResponse<List<ChartPointDTO>>
+                .SuccessResponse(result, "Revenue trend generated successfully");
+        }
 
-            var response = new FinancialReportResponseDTO
+        public async Task<ApiResponse<List<ReportRowDTO>>> GetTopSellingPartsAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetTopSellingPartsAsync(fromDate, toDate);
+
+            return ApiResponse<List<ReportRowDTO>>
+                .SuccessResponse(result, "Top selling parts report generated successfully");
+        }
+
+        public async Task<ApiResponse<List<ChartPointDTO>>> GetPaymentMethodsAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRangeForList<ChartPointDTO>(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetPaymentMethodsAsync(fromDate, toDate);
+
+            return ApiResponse<List<ChartPointDTO>>
+                .SuccessResponse(result, "Payment methods report generated successfully");
+        }
+
+        public async Task<ApiResponse<SummaryCardDTO>> GetProfitEstimateAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRangeForSummaryCard(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetProfitEstimateAsync(fromDate, toDate);
+
+            return ApiResponse<SummaryCardDTO>
+                .SuccessResponse(result, "Profit estimate generated successfully");
+        }
+
+        public async Task<ApiResponse<List<ReportRowDTO>>> GetHighSpendersAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetHighSpendersAsync(fromDate, toDate);
+
+            return ApiResponse<List<ReportRowDTO>>
+                .SuccessResponse(result, "High spenders report generated successfully");
+        }
+
+        public async Task<ApiResponse<List<ReportRowDTO>>> GetRegularCustomersAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetRegularCustomersAsync(fromDate, toDate);
+
+            return ApiResponse<List<ReportRowDTO>>
+                .SuccessResponse(result, "Regular customers report generated successfully");
+        }
+
+        public async Task<ApiResponse<List<PendingCreditDTO>>> GetPendingCreditsAsync()
+        {
+            var result = await _reportRepository.GetPendingCreditsAsync();
+
+            return ApiResponse<List<PendingCreditDTO>>
+                .SuccessResponse(result, "Pending credits report generated successfully");
+        }
+
+        public async Task<ApiResponse<List<ReportRowDTO>>> GetFrequentVehiclesAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetFrequentVehiclesAsync(fromDate, toDate);
+
+            return ApiResponse<List<ReportRowDTO>>
+                .SuccessResponse(result, "Frequent vehicles report generated successfully");
+        }
+
+        public async Task<ApiResponse<List<ChartPointDTO>>> GetAppointmentStatsAsync(
+            DateTime fromDate,
+            DateTime toDate
+        )
+        {
+            var validation = ValidateDateRangeForList<ChartPointDTO>(fromDate, toDate);
+            if (validation != null) return validation;
+
+            var result = await _reportRepository.GetAppointmentStatsAsync(fromDate, toDate);
+
+            return ApiResponse<List<ChartPointDTO>>
+                .SuccessResponse(result, "Appointment stats report generated successfully");
+        }
+
+        private ApiResponse<FinancialSummaryDTO>? ValidateDateRange(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate > toDate)
             {
-                ReportType = type.ToLower(),
-                FromDate = fromDate,
-                ToDate = now,
-                TotalSales = totalSales,
-                TotalPurchases = totalPurchases,
-                NetProfit = totalSales - totalPurchases,
-                SalesInvoiceCount = salesInvoices.Count,
-                PurchaseInvoiceCount = purchaseInvoices.Count
-            };
+                return ApiResponse<FinancialSummaryDTO>
+                    .ErrorResponse("From date cannot be greater than to date.");
+            }
 
-            return ApiResponse<FinancialReportResponseDTO>
-                .SuccessResponse(response, "Financial report generated successfully");
+            return null;
         }
-        //for overdue credit reports
-        public async Task<List<CustomerProfile>> GetUnpaidCreditReportAsync()
+
+        private ApiResponse<List<T>>? ValidateDateRangeForList<T>(DateTime fromDate, DateTime toDate)
         {
-            //Calculate 1 month ago using the Nepal timezone helper
-            var threshold = DateTimeHelper.NepalNow.AddMonths(-1); 
-            
-            //Fetch customers with credit balance who haven't paid in 30+ days
-            return await _reportRepository.GetOverdueCreditCustomersAsync(threshold); 
+            if (fromDate > toDate)
+            {
+                return ApiResponse<List<T>>
+                    .ErrorResponse("From date cannot be greater than to date.");
+            }
+
+            return null;
         }
-        public async Task<List<CustomerProfile>> GetCustomersWithCreditAsync()
+
+        private ApiResponse<SummaryCardDTO>? ValidateDateRangeForSummaryCard(DateTime fromDate, DateTime toDate)
         {
-            return await _reportRepository.GetCustomersWithCreditAsync();
+            if (fromDate > toDate)
+            {
+                return ApiResponse<SummaryCardDTO>
+                    .ErrorResponse("From date cannot be greater than to date.");
+            }
+
+            return null;
         }
     }
 }

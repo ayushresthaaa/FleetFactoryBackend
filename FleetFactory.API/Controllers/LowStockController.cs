@@ -7,10 +7,10 @@ namespace FleetFactory.API.Controllers
     [Route("api/low-stock")]
     public class LowStockController(ILowStockService _lowStockService) : ControllerBase
     {
-        [HttpPost("check")]
-        public async Task<IActionResult> CheckLowStock([FromQuery] int threshold = 10)
+      [HttpPost("check")]
+        public async Task<IActionResult> CheckLowStock()
         {
-            var result = await _lowStockService.CheckLowStockAsync(threshold);
+            var result = await _lowStockService.CheckLowStockAsync();
             return Ok(result);
         }
     }

@@ -21,5 +21,12 @@ namespace FleetFactory.Application.Interfaces.Services
             string customerName,
             DateTime scheduledAt,
             string? reason);
+
+       Task SendLowStockAlertEmailAsync(
+            string partName,
+            string sku,
+            int stockQty,
+            int threshold);
+        
     }
 }
