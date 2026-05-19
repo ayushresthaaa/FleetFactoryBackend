@@ -9,6 +9,8 @@ namespace FleetFactory.Infrastructure.Services
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("Low stock background service started.");
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -18,9 +20,19 @@ namespace FleetFactory.Infrastructure.Services
                     var lowStockService = scope.ServiceProvider
                         .GetRequiredService<ILowStockService>();
 
-                    await lowStockService.CheckLowStockAsync(10);
+                    var result = await lowStockService.CheckLowStockAsync();
 
-                    _logger.LogInformation("Low stock background check completed.");
+                    if (result.Success && result.Data?.Any() == true)
+                    {
+                        _logger.LogWarning(
+                            "{Count} low stock part(s) found and notification(s) created.",
+                            result.Data.Count
+                        );
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No low stock parts found.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -29,6 +41,8 @@ namespace FleetFactory.Infrastructure.Services
 
                 await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
+
+            _logger.LogInformation("Low stock background service stopped.");
         }
     }
 }
