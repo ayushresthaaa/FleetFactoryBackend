@@ -14,6 +14,9 @@ namespace FleetFactory.Domain.Entities
 
         public bool IsActive { get; set; } = true;
 
+        //category-specific low stock threshold
+        public int LowStockThreshold { get; set; } = 10;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

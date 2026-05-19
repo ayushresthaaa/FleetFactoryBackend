@@ -61,7 +61,8 @@ namespace FleetFactory.Application.Features.PartCategories.Services
                 Description = request.Description,
                 IsActive = true,
                 CreatedAt = DateTimeHelper.UtcNow,
-                UpdatedAt = DateTimeHelper.UtcNow
+                UpdatedAt = DateTimeHelper.UtcNow,
+                LowStockThreshold = request.LowStockThreshold,
             };
 
             await _categoryRepository.AddAsync(category);
@@ -73,7 +74,8 @@ namespace FleetFactory.Application.Features.PartCategories.Services
                 Name = category.Name,
                 Description = category.Description,
                 IsActive = category.IsActive,
-                CreatedAt = category.CreatedAt
+                CreatedAt = category.CreatedAt,
+                LowStockThreshold = category.LowStockThreshold
             };
 
             return ApiResponse<PartCategoryResponseDto>
@@ -95,6 +97,7 @@ namespace FleetFactory.Application.Features.PartCategories.Services
             category.Name = request.Name.Trim();
             category.Description = request.Description;
             category.IsActive = request.IsActive;
+            category.LowStockThreshold = request.LowStockThreshold;
             category.UpdatedAt = DateTimeHelper.UtcNow;
 
             _categoryRepository.Update(category);
@@ -106,6 +109,7 @@ namespace FleetFactory.Application.Features.PartCategories.Services
                 Name = category.Name,
                 Description = category.Description,
                 IsActive = category.IsActive,
+                LowStockThreshold = category.LowStockThreshold,
                 CreatedAt = category.CreatedAt
             };
 

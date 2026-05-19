@@ -7,5 +7,6 @@ namespace FleetFactory.Application.Features.PartCategories.DTOs
         public string? Description { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int LowStockThreshold { get; set; }
     }
 }
