@@ -161,10 +161,13 @@ app.MapGet("/health", () =>
 
 
 
-//use this to seed roles and admin user on startup
-
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+
     var roleManager = scope.ServiceProvider
         .GetRequiredService<RoleManager<IdentityRole>>();
 
