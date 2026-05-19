@@ -4,7 +4,7 @@ namespace FleetFactory.Application.Interfaces.Repositories
 {
     public interface ILowStockRepository
     {
-        Task<List<Part>> GetLowStockPartsAsync(int threshold);
+        Task<List<Part>> GetLowStockPartsAsync();
 
         Task AddNotificationAsync(Notification notification);
 
