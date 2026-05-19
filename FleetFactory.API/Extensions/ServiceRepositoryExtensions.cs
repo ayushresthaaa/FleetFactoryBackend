@@ -18,6 +18,9 @@ using FleetFactory.Application.Features.SalesInvoices.Services;
 using FleetFactory.Application.Features.PartCategories.Services;
 using FleetFactory.Application.Features.CustomerLookup.Services; 
 using FleetFactory.Application.Features.CustomerProfileManagement.Services;
+using FleetFactory.Application.Features.Appointments.Services;
+using FleetFactory.Application.Features.PartRequests.Services;
+using FleetFactory.Application.Features.Reviews.Services;
 namespace FleetFactory.API.Extensions
 {
     public static class ServiceRepositoryExtensions
@@ -45,7 +48,9 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<ICustomerLookupService, CustomerLookupService>();
             services.AddScoped<ISendInvoiceEmailService, SendInvoiceEmailService>();
             services.AddScoped<ICustomerProfileService, CustomerProfileService>();
-
+            services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<IPartRequestService, PartRequestService>();
+            services.AddScoped<IReviewService, ReviewService>();
             //repositories
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<IPurchaseInvoiceRepository, PurchaseInvoiceRepository>();
@@ -59,6 +64,9 @@ namespace FleetFactory.API.Extensions
             services.AddScoped<IPartCategoryRepository, PartCategoryRepository>();
             services.AddScoped<ICustomerLookupRepository, CustomerLookupRepository>();
             services.AddScoped<ICustomerProfileRepository, CustomerProfileRepository>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+            services.AddScoped<IPartRequestRepository, PartRequestRepository>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
             return services;
         }
     }

@@ -227,6 +227,16 @@ namespace FleetFactory.Infrastructure.Persistence
                 .HasForeignKey(r => r.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<Review>()
+                .HasOne(r => r.Appointment)
+                .WithOne(a => a.Review)
+                .HasForeignKey<Review>(r => r.AppointmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Review>()
+                .HasIndex(r => r.AppointmentId)
+                .IsUnique();
+            
             //precisoin required 
             builder.Entity<Part>(entity =>
             {

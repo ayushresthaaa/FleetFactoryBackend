@@ -37,5 +37,7 @@ namespace FleetFactory.Domain.Entities
         
         //navigation to the identity user 
         public ApplicationUser User { get; set; } = null!;
+
+
     }
 }
