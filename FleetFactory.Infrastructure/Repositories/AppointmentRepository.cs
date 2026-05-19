@@ -31,6 +31,8 @@ namespace FleetFactory.Infrastructure.Repositories
             return await _context.Appointments
                 .Include(a => a.Customer)
                 .Include(a => a.Vehicle)
+                .Include(a => a.SalesInvoices)
+                .Include(a => a.Review)
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
