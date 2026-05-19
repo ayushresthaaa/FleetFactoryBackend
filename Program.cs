@@ -123,6 +123,8 @@ builder.Services.AddAuthentication(
     );
 //hosted service means it will run in the background and check for low stock every hour and send notifications to the users
 builder.Services.AddHostedService<LowStockBackgroundService>();
+builder.Services.AddHostedService<OverdueCreditBackgroundService>();
+
 var app = builder.Build();
 
 
