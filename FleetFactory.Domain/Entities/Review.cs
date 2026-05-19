@@ -10,6 +10,9 @@ namespace FleetFactory.Domain.Entities
         [Required]
         public Guid CustomerId { get; set; }
 
+        [Required]
+        public Guid AppointmentId { get; set; }
+
         [Range(1, 5)]
         public int Rating { get; set; }
 
@@ -21,5 +24,7 @@ namespace FleetFactory.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public CustomerProfile Customer { get; set; } = null!;
+
+        public Appointment Appointment { get; set; } = null!;
     }
 }

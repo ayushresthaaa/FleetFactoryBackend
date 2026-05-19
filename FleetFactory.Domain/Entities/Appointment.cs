@@ -27,5 +27,6 @@ namespace FleetFactory.Domain.Entities
         public Vehicle? Vehicle { get; set; }
 
         public ICollection<SalesInvoice> SalesInvoices { get; set; } = new List<SalesInvoice>();
+        public Review? Review { get; set; }
     }
 }
