@@ -7,18 +7,22 @@ using FleetFactory.Shared.Results;
 
 namespace FleetFactory.Application.Features.LowStock.Services
 {
-    public class LowStockService(ILowStockRepository _lowStockRepository) : ILowStockService
+    public class LowStockService(
+        ILowStockRepository _lowStockRepository,
+        IEmailService _emailService
+    ) : ILowStockService
     {
         public async Task<ApiResponse<List<LowStockNotificationResponseDTO>>> 
-            CheckLowStockAsync(int threshold = 10)
+            CheckLowStockAsync()
         {
-            var lowStockParts = await _lowStockRepository.GetLowStockPartsAsync(threshold);
+            var lowStockParts = await _lowStockRepository.GetLowStockPartsAsync();
 
             var response = new List<LowStockNotificationResponseDTO>();
 
             foreach (var part in lowStockParts)
             {
-                var message = $"{part.Name} is low in stock. Current quantity: {part.StockQty}";
+                var message =
+                    $"{part.Name} is low in stock. Current quantity: {part.StockQty}";
 
                 var notification = new Notification
                 {
@@ -31,6 +35,13 @@ namespace FleetFactory.Application.Features.LowStock.Services
                 };
 
                 await _lowStockRepository.AddNotificationAsync(notification);
+
+                await _emailService.SendLowStockAlertEmailAsync(
+                    part.Name,
+                    part.Sku,
+                    part.StockQty,
+                    part.Category!.LowStockThreshold
+                );
 
                 response.Add(new LowStockNotificationResponseDTO
                 {

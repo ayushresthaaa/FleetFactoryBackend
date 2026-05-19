@@ -155,5 +155,57 @@ namespace FleetFactory.Infrastructure.Services
                 body
             );
         }
+
+        public async Task SendLowStockAlertEmailAsync(
+            string partName,
+            string sku,
+            int stockQty,
+            int threshold)
+        {
+            string subject = $"Low Stock Alert - {partName}";
+
+            string body = $@"
+                <h2>Low Stock Alert</h2>
+
+                <p>
+                    The following part is low in stock:
+                </p>
+
+                <table style='border-collapse: collapse; width: 100%;'>
+                    <tr>
+                        <td><b>Part</b></td>
+                        <td>{partName}</td>
+                    </tr>
+                    <tr>
+                        <td><b>SKU</b></td>
+                        <td>{sku}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Current Stock</b></td>
+                        <td>{stockQty}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Threshold</b></td>
+                        <td>{threshold}</td>
+                    </tr>
+                </table>
+
+                <br/>
+
+                <p>
+                    Please restock this item as soon as possible.
+                </p>
+
+                <p>
+                    Sent via Fleet Factory System:
+                    {DateTimeHelper.NepalNow}
+                </p>";
+
+            await _mailKitHelper.SendEmailAsync(
+                "admin@fleetfactory.com",
+                subject,
+                body
+            );
+        }
     }
 }
