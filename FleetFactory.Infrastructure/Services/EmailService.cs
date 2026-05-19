@@ -117,5 +117,43 @@ namespace FleetFactory.Infrastructure.Services
                 body
             );
         }
+
+
+        public async Task SendAppointmentCancelledEmailAsync(
+            string customerEmail,
+            string customerName,
+            DateTime scheduledAt,
+            string? reason)
+        {
+            string subject = "Fleet Factory Appointment Cancelled";
+
+            string body = $@"
+                <h2>Appointment Cancelled</h2>
+
+                <p>Hello {customerName},</p>
+
+                <p>
+                    Your appointment scheduled for
+                    <b>{scheduledAt}</b>
+                    has been cancelled.
+                </p>
+
+                <p>
+                    <b>Reason:</b> {(string.IsNullOrWhiteSpace(reason) ? "Not specified" : reason)}
+                </p>
+
+                <br/>
+
+                <p>
+                    Sent via Fleet Factory System:
+                    {DateTimeHelper.NepalNow}
+                </p>";
+
+            await _mailKitHelper.SendEmailAsync(
+                customerEmail,
+                subject,
+                body
+            );
+        }
     }
 }

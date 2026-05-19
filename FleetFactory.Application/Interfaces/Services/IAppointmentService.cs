@@ -17,12 +17,13 @@ namespace FleetFactory.Application.Interfaces.Services
 
         Task<ApiResponse<AppointmentResponseDTO>> ConfirmAsync(Guid id);
 
-        Task<ApiResponse<AppointmentResponseDTO>> CancelAsync(Guid id);
+        Task<ApiResponse<AppointmentResponseDTO>> CancelAsync(Guid id, CancelAppointmentRequestDTO request);
         
         Task<ApiResponse<PagedResult<AppointmentResponseDTO>>> SearchAsync(
             string? query,
             AppointmentStatus? status,
             int pageNumber,
             int pageSize);
+        
     }
 }

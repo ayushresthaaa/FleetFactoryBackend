@@ -10,7 +10,8 @@ namespace FleetFactory.Application.Features.Appointments.Services
 {
     public class AppointmentService(
         IAppointmentRepository _appointmentRepository,
-        ICustomerProfileRepository _customerProfileRepository
+        ICustomerProfileRepository _customerProfileRepository,
+        IEmailService _emailService
     ) : IAppointmentService
     {
         public async Task<ApiResponse<PagedResult<AppointmentResponseDTO>>> GetAllAsync(
@@ -59,6 +60,15 @@ namespace FleetFactory.Application.Features.Appointments.Services
 
             if (request.ScheduledAt <= DateTimeHelper.UtcNow)
                 return ApiResponse<AppointmentResponseDTO>.ErrorResponse("Scheduled date must be in the future");
+            
+            var appointmentCount = await _appointmentRepository
+                .CountActiveAppointmentsByDateAsync(request.ScheduledAt);
+
+            if (appointmentCount >= 30)
+            {
+                return ApiResponse<AppointmentResponseDTO>
+                    .ErrorResponse("Appointment limit reached for this day. Please choose another day.");
+            }
 
             if (request.VehicleId.HasValue &&
                 !customer.Vehicles.Any(v => v.Id == request.VehicleId.Value))
@@ -106,7 +116,7 @@ namespace FleetFactory.Application.Features.Appointments.Services
             return await GetByIdAsync(id);
         }
 
-        public async Task<ApiResponse<AppointmentResponseDTO>> CancelAsync(Guid id)
+        public async Task<ApiResponse<AppointmentResponseDTO>> CancelAsync(Guid id, CancelAppointmentRequestDTO request)
         {
             var appointment = await _appointmentRepository.GetByIdAsync(id);
 
@@ -124,6 +134,19 @@ namespace FleetFactory.Application.Features.Appointments.Services
 
             _appointmentRepository.Update(appointment);
             await _appointmentRepository.SaveChangesAsync();
+
+            var customerEmail = appointment.Customer.User?.Email;
+            var customerName = appointment.Customer.FullName;
+
+            if (!string.IsNullOrWhiteSpace(customerEmail))
+            {
+                await _emailService.SendAppointmentCancelledEmailAsync(
+                    customerEmail,
+                    customerName,
+                    appointment.ScheduledAt,
+                    request.Reason
+                );
+            }
 
             return await GetByIdAsync(id);
         }

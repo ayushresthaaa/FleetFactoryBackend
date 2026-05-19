@@ -16,5 +16,10 @@ namespace FleetFactory.Application.Interfaces.Services
             string customerEmail,
             string customerName,
             string partName);
+        Task SendAppointmentCancelledEmailAsync(
+            string customerEmail,
+            string customerName,
+            DateTime scheduledAt,
+            string? reason);
     }
 }
