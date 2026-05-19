@@ -14,7 +14,7 @@ namespace FleetFactory.API.Controllers
     ) : ControllerBase
     {
         [HttpPost("me")]
-        // [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CreateMyRequest(
             [FromBody] CreatePartRequestRequestDTO request)
         {
@@ -33,7 +33,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("me")]
-        // [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetMyRequests()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -51,7 +51,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("me/{id:guid}")]
-        // [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetMyRequestById(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -69,7 +69,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetAll(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
@@ -96,7 +96,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _partRequestService.GetByIdAsync(id);
@@ -108,7 +108,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPatch("{id:guid}/sourced")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> MarkAsSourced(
             Guid id,
             [FromBody] UpdatePartRequestStatusDTO request)
@@ -122,7 +122,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPatch("{id:guid}/reject")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Reject(
             Guid id,
             [FromBody] UpdatePartRequestStatusDTO request)

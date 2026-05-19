@@ -1,11 +1,13 @@
 using FleetFactory.Application.Features.Staff.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class StaffController(IStaffService _staffService) : ControllerBase
     {
         [HttpGet]

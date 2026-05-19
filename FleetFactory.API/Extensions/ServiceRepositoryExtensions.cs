@@ -22,7 +22,6 @@ using FleetFactory.Application.Features.Appointments.Services;
 using FleetFactory.Application.Features.PartRequests.Services;
 using FleetFactory.Application.Features.Reviews.Services;
 using FleetFactory.Application.Features.OverdueCredits.Services;
-using FleetFactory.Infrastructure.Services;
 
 namespace FleetFactory.API.Extensions
 {

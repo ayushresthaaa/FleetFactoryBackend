@@ -1,11 +1,12 @@
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,Staff")]
     public class CustomerLookupController(
         ICustomerLookupService _customerLookupService
     ) : ControllerBase

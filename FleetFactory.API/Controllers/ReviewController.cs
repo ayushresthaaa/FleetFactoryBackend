@@ -8,10 +8,11 @@ namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/reviews")]
+    [Authorize]
     public class ReviewsController(IReviewService _reviewService) : ControllerBase
     {
         [HttpPost("me")]
-        // [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CreateMyReview(
             [FromBody] CreateReviewRequestDTO request)
         {
@@ -30,7 +31,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("me")]
-        // [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetMyReviews()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -48,7 +49,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("me/{id:guid}")]
-        // [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetMyReviewById(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -66,7 +67,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetAll(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
@@ -76,7 +77,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _reviewService.GetByIdAsync(id);
@@ -88,7 +89,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("customer/{customerId:guid}")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetByCustomerId(Guid customerId)
         {
             var result = await _reviewService.GetByCustomerIdAsync(customerId);
@@ -96,7 +97,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPatch("{id:guid}/hide")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Hide(Guid id)
         {
             var result = await _reviewService.HideAsync(id);
@@ -108,7 +109,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPatch("{id:guid}/show")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Show(Guid id)
         {
             var result = await _reviewService.ShowAsync(id);

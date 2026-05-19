@@ -1,11 +1,13 @@
 using FleetFactory.Application.Features.Customers.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,Staff")]
     public class CustomersController(ICustomerService _customerService) : ControllerBase
     {
         [HttpGet]

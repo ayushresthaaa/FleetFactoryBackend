@@ -2,11 +2,14 @@ using FleetFactory.Application.Features.PurchaseInvoices.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using FleetFactory.Domain.Enums;
 namespace FleetFactory.API.Controllers
+
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class PurchaseInvoiceController(IPurchaseInvoiceService _purchaseInvoiceService) : ControllerBase
     {
         [HttpGet]
@@ -33,11 +36,11 @@ namespace FleetFactory.API.Controllers
          [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePurchaseInvoiceRequestDto request)
         {
-            // temporary for now until auth is added properly
            var createdById = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? User.FindFirstValue("sub")
-                ?? "a486b986-cf38-4280-a1f2-3994477915cb"; 
+                ?? User.FindFirstValue("sub");
 
+            if (string.IsNullOrWhiteSpace(createdById))
+                return Unauthorized();
             var result = await _purchaseInvoiceService.CreateAsync(request, createdById);
 
             if (!result.Success)
@@ -60,10 +63,11 @@ namespace FleetFactory.API.Controllers
         [HttpPatch("{id:guid}/receive")]
         public async Task<IActionResult> Receive(Guid id)
         {
-            var receivedById = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? User.FindFirstValue("sub")
-                ?? "a486b986-cf38-4280-a1f2-3994477915cb";
+           var receivedById = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
 
+            if (string.IsNullOrWhiteSpace(receivedById))
+                return Unauthorized();
             var result = await _purchaseInvoiceService.ReceiveAsync(id, receivedById);
 
             if (!result.Success)

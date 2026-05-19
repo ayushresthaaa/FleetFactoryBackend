@@ -9,12 +9,13 @@ namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/appointments")]
+    [Authorize]
     public class AppointmentController(
         IAppointmentService _appointmentService
     ) : ControllerBase
     {
         [HttpGet]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetAll(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
@@ -24,7 +25,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _appointmentService.GetByIdAsync(id);
@@ -36,7 +37,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPost("me")]
-        // [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CreateMyAppointment(
             [FromBody] CreateMyAppointmentRequestDTO request)
         {
@@ -60,7 +61,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPatch("{id:guid}/confirm")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Confirm(Guid id)
         {
             var result = await _appointmentService.ConfirmAsync(id);
@@ -72,7 +73,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPatch("{id:guid}/cancel")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Cancel(
             Guid id,
             [FromBody] CancelAppointmentRequestDTO request)
@@ -86,7 +87,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("search")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Search(
             [FromQuery] string? query,
             [FromQuery] AppointmentStatus? status,

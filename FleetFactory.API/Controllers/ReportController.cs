@@ -1,10 +1,12 @@
 using FleetFactory.Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/reports")]
+    [Authorize]
     public class ReportController(
         IReportService _reportService
     ) : ControllerBase
@@ -12,7 +14,7 @@ namespace FleetFactory.API.Controllers
         // Dashboard APIs
 
         [HttpGet("admin-dashboard")]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAdminDashboard()
         {
             var result = await _reportService.GetAdminDashboardAsync();
@@ -21,7 +23,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("staff-dashboard")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetStaffDashboard()
         {
             var result = await _reportService.GetStaffDashboardAsync();
@@ -32,7 +34,7 @@ namespace FleetFactory.API.Controllers
         // Financial reports
 
         [HttpGet("financial-summary")]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetFinancialSummary(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)
@@ -47,7 +49,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("revenue-trend")]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetRevenueTrend(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to,
@@ -63,7 +65,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("top-selling-parts")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetTopSellingParts(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)
@@ -78,7 +80,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("payment-methods")]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPaymentMethods(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)
@@ -93,7 +95,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("profit-estimate")]
-        // [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetProfitEstimate(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)
@@ -110,7 +112,7 @@ namespace FleetFactory.API.Controllers
         // Customer / staff reports
 
         [HttpGet("high-spenders")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetHighSpenders(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)
@@ -125,7 +127,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("regular-customers")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetRegularCustomers(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)
@@ -140,7 +142,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("pending-credits")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetPendingCredits()
         {
             var result = await _reportService
@@ -150,7 +152,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("frequent-vehicles")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetFrequentVehicles(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)
@@ -165,7 +167,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("appointment-stats")]
-        // [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetAppointmentStats(
             [FromQuery] DateTime from,
             [FromQuery] DateTime to)

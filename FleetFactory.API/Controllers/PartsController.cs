@@ -1,15 +1,17 @@
 using FleetFactory.Application.Features.Parts.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace FleetFactory.API.Controllers
 {
 
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class PartsController (IPartService _partService) : ControllerBase
     {
         [HttpGet]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetAll(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
@@ -19,6 +21,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _partService.GetByIdAsync(id);
@@ -30,6 +33,7 @@ namespace FleetFactory.API.Controllers
         }
 
        [HttpPost]
+       [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Create([FromForm] CreatePartRequestDto request)
         {
             var result = await _partService.CreateAsync(request);
@@ -41,6 +45,7 @@ namespace FleetFactory.API.Controllers
         }
 
        [HttpPut("{id:guid}")]
+       [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(Guid id, [FromForm] UpdatePartRequestDto request)
         {
             var result = await _partService.UpdateAsync(id, request);
@@ -52,6 +57,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _partService.DeleteAsync(id);
@@ -63,6 +69,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("search")]
+        [Authorize(Roles = "Admin,Staff,Customer")]
         public async Task<IActionResult> Search(
             [FromQuery] string keyword,
             [FromQuery] int pageNumber = 1,
@@ -77,6 +84,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("low-stock")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetLowStock(
             [FromQuery] int threshold = 10)
         {
@@ -86,6 +94,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("available")]
+        [Authorize(Roles = "Admin,Staff,Customer")]
         public async Task<IActionResult> GetAvailable()
         {
             var result = await _partService.GetAvailableAsync();
@@ -94,6 +103,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("{id:guid}/stock-movements")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetStockMovements(Guid id)
         {
             var result = await _partService.GetStockMovementsAsync(id);
@@ -105,6 +115,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("vendor/{vendorId:guid}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> GetByVendor(
             Guid vendorId,
             [FromQuery] int pageNumber = 1,
@@ -119,6 +130,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpGet("category/{categoryId:guid}")]
+        [Authorize(Roles = "Admin,Staff,Customer")]
         public async Task<IActionResult> GetByCategory(
             Guid categoryId,
             [FromQuery] int pageNumber = 1,

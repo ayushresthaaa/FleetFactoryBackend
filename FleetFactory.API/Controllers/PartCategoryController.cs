@@ -1,10 +1,11 @@
 using FleetFactory.Application.Features.PartCategories.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class PartCategoryController(
         IPartCategoryService _categoryService
@@ -29,6 +30,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreatePartCategoryRequestDto request)
         {
             var result = await _categoryService.CreateAsync(request);
@@ -40,6 +42,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePartCategoryRequestDto request)
         {
             var result = await _categoryService.UpdateAsync(id, request);
@@ -51,6 +54,7 @@ namespace FleetFactory.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _categoryService.DeleteAsync(id);

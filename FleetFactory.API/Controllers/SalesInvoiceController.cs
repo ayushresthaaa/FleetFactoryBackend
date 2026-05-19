@@ -2,11 +2,13 @@ using FleetFactory.Application.Features.SalesInvoices.DTOs;
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using FleetFactory.Domain.Enums;
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin,Staff")]
     public class SalesInvoiceController(ISalesInvoiceService _salesInvoiceService, ISendInvoiceEmailService _sendInvoiceEmailService) : ControllerBase
     {
         [HttpGet]

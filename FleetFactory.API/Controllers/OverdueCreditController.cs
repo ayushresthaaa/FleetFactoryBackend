@@ -1,9 +1,10 @@
 using FleetFactory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace FleetFactory.API.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin,Staff")]
     [Route("api/overdue-credits")]
     public class OverdueCreditController(
         IOverdueCreditService _overdueCreditService

@@ -20,10 +20,16 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
                     .ErrorResponse("Sales invoice not found");
             }
 
-            var customerEmail = invoice.Customer?.User?.Email;
+           if (invoice.Customer == null)
+            {
+                return ApiResponse<string>
+                    .ErrorResponse("Customer not found");
+            }
 
-            var customerName = invoice.Customer?.FullName ?? "Customer";
+            var customerEmail = invoice.Customer.User?.Email;
 
+            var customerName = invoice.Customer.FullName ?? "Customer";
+         
             if (string.IsNullOrWhiteSpace(customerEmail))
             {
                 return ApiResponse<string>
