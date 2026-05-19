@@ -1,0 +1,42 @@
+services:
+  api:
+    build: .
+    container_name: fleetfactory_api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=FleetFactoryDB;Username=postgres;Password=ayush123
+
+      Jwt__Issuer: FleetFactoryBackend
+      Jwt__Audience: FleetFactoryFrontend
+      Jwt__SecretKey: Thisisthesupersecretlongkeyasdasdkhqwekjhkjasdhjkasdhqidasdsadasdqwdasdsad
+
+      Cloudinary__CloudName: dgvhwxtqp
+      Cloudinary__ApiKey: 531245745176796
+      Cloudinary__ApiSecret: c0dJ7RywkAJsah3sPrsHlB3bbzo
+
+      EmailSettings__SmtpServer: smtp.gmail.com
+      EmailSettings__Port: 587
+      EmailSettings__Username: ayushresthaas@gmail.com
+      EmailSettings__Password: "nmdv kokw wtaz taoo"
+
+  postgres:
+    image: postgres:17
+    container_name: fleetfactory_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: FleetFactoryDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ayush123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
