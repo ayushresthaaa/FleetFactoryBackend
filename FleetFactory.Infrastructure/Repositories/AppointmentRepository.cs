@@ -30,6 +30,7 @@ namespace FleetFactory.Infrastructure.Repositories
         {
             return await _context.Appointments
                 .Include(a => a.Customer)
+                    .ThenInclude(c => c.User)
                 .Include(a => a.Vehicle)
                 .Include(a => a.SalesInvoices)
                 .Include(a => a.Review)
@@ -89,6 +90,18 @@ namespace FleetFactory.Infrastructure.Repositories
                 .ToListAsync();
 
             return (appointments, totalCount);
+        }
+
+        public async Task<int> CountActiveAppointmentsByDateAsync(DateTime date)
+        {
+            var start = date.Date;
+            var end = start.AddDays(1);
+
+            return await _context.Appointments
+                .CountAsync(a =>
+                    a.ScheduledAt >= start &&
+                    a.ScheduledAt < end &&
+                    a.Status != AppointmentStatus.Cancelled);
         }
     }
 }

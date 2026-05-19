@@ -20,5 +20,7 @@ namespace FleetFactory.Application.Interfaces.Repositories
             AppointmentStatus? status,
             int pageNumber,
             int pageSize);
+
+        Task<int> CountActiveAppointmentsByDateAsync(DateTime date);
     }
 }

@@ -73,9 +73,11 @@ namespace FleetFactory.API.Controllers
 
         [HttpPatch("{id:guid}/cancel")]
         // [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> Cancel(Guid id)
+        public async Task<IActionResult> Cancel(
+            Guid id,
+            [FromBody] CancelAppointmentRequestDTO request)
         {
-            var result = await _appointmentService.CancelAsync(id);
+            var result = await _appointmentService.CancelAsync(id, request);
 
             if (!result.Success)
                 return BadRequest(result);
