@@ -7,39 +7,6 @@ namespace FleetFactory.Infrastructure.Services
     //seer
     public class EmailService(MailKitHelper _mailKitHelper) : IEmailService
     {
-        public async Task SendUnpaidCreditReminderAsync(
-            string customerEmail,
-            string customerName,
-            decimal amount)
-        {
-            string subject = "Action Required: Unpaid Credit Reminder";
-
-            string body = $@"
-                <h3>Hello {customerName},</h3>
-
-                <p>
-                    This is a reminder that you have an unpaid credit of
-                    <b>Rs. {amount}</b>
-                    which has been outstanding for more than 1 month.
-                </p>
-
-                <p>
-                    Please visit Fleet Factory to clear your dues.
-                </p>
-
-                <br/>
-
-                <p>
-                    Sent via Fleet Factory System:
-                    {DateTimeHelper.NepalNow}
-                </p>";
-
-            await _mailKitHelper.SendEmailAsync(
-                customerEmail,
-                subject,
-                body
-            );
-        }
 
         //rabison : to send sales invoice email to customer
         public async Task SendSalesInvoiceAsync(
@@ -76,6 +43,59 @@ namespace FleetFactory.Infrastructure.Services
 
             await _mailKitHelper.SendEmailAsync(
                 customerEmail,
+                subject,
+                body
+            );
+        }
+        
+        //rabisoon to send unpaid credit reminder email to customer
+        public async Task SendOverdueCreditReminderEmailAsync(
+            string email,
+            string customerName,
+            decimal creditBalance)
+        {
+            string subject = "Fleet Factory - Overdue Credit Reminder";
+
+            string body = $@"
+                <h2>Overdue Credit Reminder</h2>
+
+                <p>Hello {customerName},</p>
+
+                <p>
+                    This is a reminder that you have an unpaid credit balance
+                    with Fleet Factory.
+                </p>
+
+                <table style='border-collapse: collapse; width: 100%;'>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ddd;'>
+                            <b>Pending Credit Amount</b>
+                        </td>
+                        <td style='padding: 8px; border: 1px solid #ddd;'>
+                            Rs. {creditBalance}
+                        </td>
+                    </tr>
+                </table>
+
+                <br/>
+
+                <p>
+                    Please clear your pending payment as soon as possible.
+                </p>
+
+                <p>
+                    If you have already paid, please ignore this message.
+                </p>
+
+                <br/>
+
+                <p>
+                    Sent via Fleet Factory System:
+                    {DateTimeHelper.NepalNow}
+                </p>";
+
+            await _mailKitHelper.SendEmailAsync(
+                email,
                 subject,
                 body
             );
@@ -156,6 +176,7 @@ namespace FleetFactory.Infrastructure.Services
             );
         }
 
+        //seer : to send low stock alert email to admin
         public async Task SendLowStockAlertEmailAsync(
             string partName,
             string sku,
