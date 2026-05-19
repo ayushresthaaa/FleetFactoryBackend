@@ -11,7 +11,8 @@ namespace FleetFactory.Application.Features.Appointments.Services
     public class AppointmentService(
         IAppointmentRepository _appointmentRepository,
         ICustomerProfileRepository _customerProfileRepository,
-        IEmailService _emailService
+        IEmailService _emailService,
+        INotificationService _notificationService
     ) : IAppointmentService
     {
         public async Task<ApiResponse<PagedResult<AppointmentResponseDTO>>> GetAllAsync(
@@ -113,6 +114,13 @@ namespace FleetFactory.Application.Features.Appointments.Services
             _appointmentRepository.Update(appointment);
             await _appointmentRepository.SaveChangesAsync();
 
+            await _notificationService.CreateAsync(
+                appointment.Customer.UserId,
+                "appointment_confirmed",
+                "Appointment Confirmed",
+                $"Your appointment on {appointment.ScheduledAt} has been confirmed.",
+                appointment.Id
+            );
             return await GetByIdAsync(id);
         }
 
@@ -148,6 +156,13 @@ namespace FleetFactory.Application.Features.Appointments.Services
                 );
             }
 
+            await _notificationService.CreateAsync(
+                appointment.Customer.UserId,
+                "appointment_cancelled",
+                "Appointment Cancelled",
+                $"Your appointment on {appointment.ScheduledAt} has been cancelled.",
+                appointment.Id
+            );
             return await GetByIdAsync(id);
         }
 

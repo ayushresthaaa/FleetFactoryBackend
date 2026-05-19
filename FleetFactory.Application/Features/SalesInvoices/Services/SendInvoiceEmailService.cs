@@ -6,7 +6,8 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
 {
     public class SendInvoiceEmailService(
         ISalesInvoiceRepository _salesInvoiceRepository,
-        IEmailService _emailService
+        IEmailService _emailService,
+        INotificationService _notificationService
     ) : ISendInvoiceEmailService
     {
         public async Task<ApiResponse<string>> SendSalesInvoiceEmailAsync(Guid invoiceId)
@@ -36,6 +37,13 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
                 invoice.TotalAmount
             );
 
+            await _notificationService.CreateAsync(
+                invoice.Customer.UserId,
+                "invoice_sent",
+                "Invoice Sent",
+                $"Your invoice {invoice.InvoiceNo} has been sent to your email.",
+                invoice.Id
+            );
             return ApiResponse<string>
                 .SuccessResponse(
                     "Email sent",
