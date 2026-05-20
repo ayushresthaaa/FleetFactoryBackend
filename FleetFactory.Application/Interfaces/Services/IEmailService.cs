@@ -21,16 +21,17 @@ namespace FleetFactory.Application.Interfaces.Services
             DateTime scheduledAt,
             string? reason);
 
-       Task SendLowStockAlertEmailAsync(
-            string partName,
-            string sku,
-            int stockQty,
-            int threshold);
-        
         Task SendOverdueCreditReminderEmailAsync(
             string email,
             string customerName,
             decimal creditBalance
+        );
+       Task SendLowStockAlertEmailAsync(
+            string adminEmail,
+            string partName,
+            string sku,
+            int stockQty,
+            int threshold
         );
     }
 }

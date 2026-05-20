@@ -1,6 +1,7 @@
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Infrastructure.Helpers;
 
+
 namespace FleetFactory.Infrastructure.Services
 {
 
@@ -175,9 +176,9 @@ namespace FleetFactory.Infrastructure.Services
                 body
             );
         }
-
-        //seer : to send low stock alert email to admin
+      //seer : to send low stock alert email to admin
         public async Task SendLowStockAlertEmailAsync(
+            string adminEmail,
             string partName,
             string sku,
             int stockQty,
@@ -223,7 +224,7 @@ namespace FleetFactory.Infrastructure.Services
                 </p>";
 
             await _mailKitHelper.SendEmailAsync(
-                "admin@fleetfactory.com",
+                adminEmail,
                 subject,
                 body
             );

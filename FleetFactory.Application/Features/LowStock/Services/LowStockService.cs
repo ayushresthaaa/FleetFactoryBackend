@@ -3,19 +3,28 @@ using FleetFactory.Application.Interfaces.Repositories;
 using FleetFactory.Application.Interfaces.Services;
 using FleetFactory.Domain.Entities;
 using FleetFactory.Infrastructure.Helpers;
+using FleetFactory.Infrastructure.Identity;
 using FleetFactory.Shared.Results;
+using Microsoft.AspNetCore.Identity;
 
 namespace FleetFactory.Application.Features.LowStock.Services
 {
     public class LowStockService(
         ILowStockRepository _lowStockRepository,
-        IEmailService _emailService
+        IEmailService _emailService,
+        UserManager<ApplicationUser> _userManager
     ) : ILowStockService
     {
         public async Task<ApiResponse<List<LowStockNotificationResponseDTO>>> 
             CheckLowStockAsync()
         {
             var lowStockParts = await _lowStockRepository.GetLowStockPartsAsync();
+
+            Console.WriteLine($"Low stock parts found: {lowStockParts.Count}");
+
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+
+            Console.WriteLine($"Admin users found: {admins.Count}");
 
             var response = new List<LowStockNotificationResponseDTO>();
 
@@ -36,12 +45,24 @@ namespace FleetFactory.Application.Features.LowStock.Services
 
                 await _lowStockRepository.AddNotificationAsync(notification);
 
-                await _emailService.SendLowStockAlertEmailAsync(
-                    part.Name,
-                    part.Sku,
-                    part.StockQty,
-                    part.Category!.LowStockThreshold
-                );
+                foreach (var admin in admins)
+                {
+                    if (string.IsNullOrWhiteSpace(admin.Email))
+                    {
+                        Console.WriteLine($"Admin user {admin.Id} has no email.");
+                        continue;
+                    }
+
+                    Console.WriteLine($"Sending low stock email to: {admin.Email}");
+
+                    await _emailService.SendLowStockAlertEmailAsync(
+                        admin.Email,
+                        part.Name,
+                        part.Sku,
+                        part.StockQty,
+                        part.Category!.LowStockThreshold
+                    );
+                }
 
                 response.Add(new LowStockNotificationResponseDTO
                 {
