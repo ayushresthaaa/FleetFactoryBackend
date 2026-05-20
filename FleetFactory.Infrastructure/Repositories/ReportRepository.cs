@@ -226,21 +226,30 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Take(10)
                 .ToListAsync();
         }
-
-        public async Task<List<PendingCreditDTO>> GetPendingCreditsAsync()
+public async Task<List<PendingCreditDTO>> GetPendingCreditsAsync()
+{
+    return await _context.SalesInvoices
+        .Where(s =>
+            s.PaymentMethod == PaymentMethod.Credit &&
+            s.Status != InvoiceStatus.Paid &&
+            s.Status != InvoiceStatus.Cancelled
+        )
+        .GroupBy(s => new
         {
-            return await _context.CustomerProfiles
-                .Where(c => c.CreditBalance > 0)
-                .Select(c => new PendingCreditDTO
-                {
-                    CustomerId = c.Id,
-                    CustomerName = c.FullName,
-                    Phone = c.Phone,
-                    CreditBalance = c.CreditBalance
-                })
-                .OrderByDescending(x => x.CreditBalance)
-                .ToListAsync();
-        }
+            s.CustomerId,
+            s.Customer.FullName,
+            s.Customer.Phone
+        })
+        .Select(g => new PendingCreditDTO
+        {
+            CustomerId = g.Key.CustomerId,
+            CustomerName = g.Key.FullName,
+            Phone = g.Key.Phone,
+            CreditBalance = g.Sum(x => x.TotalAmount)
+        })
+        .OrderByDescending(x => x.CreditBalance)
+        .ToListAsync();
+}
 
         public async Task<List<ReportRowDTO>> GetFrequentVehiclesAsync(DateTime fromDate, DateTime toDate)
         {

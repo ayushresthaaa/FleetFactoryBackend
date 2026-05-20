@@ -4,7 +4,11 @@ namespace FleetFactory.Application.Features.PartRequests.DTOs
     {
         public Guid? VehicleId { get; set; }
 
-        public string PartName { get; set; } = null!;
+        // Existing part request
+        public Guid? PartId { get; set; }
+
+        // Custom part request
+        public string? PartName { get; set; }
 
         public string? Description { get; set; }
     }

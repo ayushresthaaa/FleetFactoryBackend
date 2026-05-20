@@ -10,8 +10,7 @@ namespace FleetFactory.Application.Interfaces.Services
             string userId,
             CreatePartRequestRequestDTO request);
 
-        Task<ApiResponse<List<PartRequestResponseDTO>>> GetMyRequestsAsync(
-            string userId);
+        Task<ApiResponse<List<PartRequestResponseDTO>>> GetMyRequestsAsync(string userId);
 
         Task<ApiResponse<PartRequestResponseDTO>> GetMyRequestByIdAsync(
             string userId,

@@ -220,7 +220,13 @@ namespace FleetFactory.Infrastructure.Persistence
                 .WithMany(v => v.PartRequests)
                 .HasForeignKey(p => p.VehicleId)
                 .OnDelete(DeleteBehavior.SetNull);
-
+            
+            builder.Entity<PartRequest>()
+                .HasOne(pr => pr.Part)
+                .WithMany()
+                .HasForeignKey(pr => pr.PartId)
+                .OnDelete(DeleteBehavior.SetNull);
+                
             builder.Entity<Review>()
                 .HasOne(r => r.Customer)
                 .WithMany(c => c.Reviews)

@@ -97,7 +97,9 @@ namespace FleetFactory.Application.Features.SalesInvoices.Services
                 PaymentMethod = request.PaymentMethod,
                 ServiceCharge = request.ServiceCharge,
                 ServiceDescription = request.ServiceDescription,
-                DueDate = request.DueDate,
+                DueDate = request.DueDate.HasValue
+                    ? DateTime.SpecifyKind(request.DueDate.Value.Date, DateTimeKind.Utc)
+                    : null,
                 Status = request.PaymentMethod == PaymentMethod.Credit
                     ? InvoiceStatus.Pending
                     : InvoiceStatus.Paid,

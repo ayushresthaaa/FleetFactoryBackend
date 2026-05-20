@@ -14,7 +14,7 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Where(p =>
                     p.IsActive &&
                     p.Category != null &&
-                    p.StockQty < p.Category.LowStockThreshold)
+                    p.StockQty <= p.Category.LowStockThreshold)
                 .OrderBy(p => p.StockQty)
                 .ToListAsync();
         }

@@ -46,7 +46,7 @@ namespace FleetFactory.Application.Features.OverdueCredits.Services
                     .ErrorResponse("Customer not found or does not have overdue credit.");
             }
 
-            if (string.IsNullOrWhiteSpace(customer.User.Email))
+           if (customer.User == null || string.IsNullOrWhiteSpace(customer.User.Email))
             {
                 return ApiResponse<string>
                     .ErrorResponse("Customer does not have an email address.");
@@ -86,8 +86,11 @@ namespace FleetFactory.Application.Features.OverdueCredits.Services
 
         private async Task SendReminderAsync(CustomerProfile customer)
         {
+            if (customer.User == null || string.IsNullOrWhiteSpace(customer.User.Email))
+                return;
+
             await _emailService.SendOverdueCreditReminderEmailAsync(
-                customer.User.Email!,
+                customer.User.Email,
                 customer.FullName,
                 customer.CreditBalance
             );

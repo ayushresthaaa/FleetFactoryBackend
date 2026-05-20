@@ -58,13 +58,15 @@ namespace FleetFactory.Application.Features.Appointments.Services
 
             if (customer == null)
                 return ApiResponse<AppointmentResponseDTO>.ErrorResponse("Customer profile not found");
+            var scheduledAtUtc = request.ScheduledAt.Kind == DateTimeKind.Utc
+                ? request.ScheduledAt
+                : request.ScheduledAt.ToUniversalTime();
 
-            if (request.ScheduledAt <= DateTimeHelper.UtcNow)
+            if (scheduledAtUtc <= DateTimeHelper.UtcNow)
                 return ApiResponse<AppointmentResponseDTO>.ErrorResponse("Scheduled date must be in the future");
-            
-            var appointmentCount = await _appointmentRepository
-                .CountActiveAppointmentsByDateAsync(request.ScheduledAt);
 
+            var appointmentCount = await _appointmentRepository
+                .CountActiveAppointmentsByDateAsync(scheduledAtUtc);
             if (appointmentCount >= 30)
             {
                 return ApiResponse<AppointmentResponseDTO>
@@ -82,7 +84,7 @@ namespace FleetFactory.Application.Features.Appointments.Services
             {
                 CustomerId = customer.Id,
                 VehicleId = request.VehicleId,
-                ScheduledAt = request.ScheduledAt,
+                ScheduledAt = scheduledAtUtc,
                 Notes = request.Notes,
                 Status = AppointmentStatus.Pending,
                 CreatedAt = DateTimeHelper.UtcNow,

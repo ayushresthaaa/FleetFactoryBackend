@@ -31,6 +31,9 @@ namespace FleetFactory.Application.Features.Reports.Services
             var validation = ValidateDateRange(fromDate, toDate);
             if (validation != null) return validation;
 
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
+
             var result = await _reportRepository.GetFinancialSummaryAsync(fromDate, toDate);
 
             return ApiResponse<FinancialSummaryDTO>
@@ -54,6 +57,9 @@ namespace FleetFactory.Application.Features.Reports.Services
                     .ErrorResponse("Invalid groupBy. Use 'day' or 'month'.");
             }
 
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
+
             var result = await _reportRepository.GetRevenueTrendAsync(fromDate, toDate, groupBy);
 
             return ApiResponse<List<ChartPointDTO>>
@@ -67,6 +73,9 @@ namespace FleetFactory.Application.Features.Reports.Services
         {
             var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
             if (validation != null) return validation;
+
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
 
             var result = await _reportRepository.GetTopSellingPartsAsync(fromDate, toDate);
 
@@ -82,6 +91,9 @@ namespace FleetFactory.Application.Features.Reports.Services
             var validation = ValidateDateRangeForList<ChartPointDTO>(fromDate, toDate);
             if (validation != null) return validation;
 
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
+
             var result = await _reportRepository.GetPaymentMethodsAsync(fromDate, toDate);
 
             return ApiResponse<List<ChartPointDTO>>
@@ -95,6 +107,9 @@ namespace FleetFactory.Application.Features.Reports.Services
         {
             var validation = ValidateDateRangeForSummaryCard(fromDate, toDate);
             if (validation != null) return validation;
+
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
 
             var result = await _reportRepository.GetProfitEstimateAsync(fromDate, toDate);
 
@@ -110,6 +125,9 @@ namespace FleetFactory.Application.Features.Reports.Services
             var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
             if (validation != null) return validation;
 
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
+
             var result = await _reportRepository.GetHighSpendersAsync(fromDate, toDate);
 
             return ApiResponse<List<ReportRowDTO>>
@@ -123,6 +141,9 @@ namespace FleetFactory.Application.Features.Reports.Services
         {
             var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
             if (validation != null) return validation;
+
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
 
             var result = await _reportRepository.GetRegularCustomersAsync(fromDate, toDate);
 
@@ -146,6 +167,9 @@ namespace FleetFactory.Application.Features.Reports.Services
             var validation = ValidateDateRangeForList<ReportRowDTO>(fromDate, toDate);
             if (validation != null) return validation;
 
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
+
             var result = await _reportRepository.GetFrequentVehiclesAsync(fromDate, toDate);
 
             return ApiResponse<List<ReportRowDTO>>
@@ -160,10 +184,26 @@ namespace FleetFactory.Application.Features.Reports.Services
             var validation = ValidateDateRangeForList<ChartPointDTO>(fromDate, toDate);
             if (validation != null) return validation;
 
+            fromDate = ToUtcDate(fromDate);
+            toDate = ToUtcEndDate(toDate);
+
             var result = await _reportRepository.GetAppointmentStatsAsync(fromDate, toDate);
 
             return ApiResponse<List<ChartPointDTO>>
                 .SuccessResponse(result, "Appointment stats report generated successfully");
+        }
+
+        private static DateTime ToUtcDate(DateTime date)
+        {
+            return DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+        }
+
+        private static DateTime ToUtcEndDate(DateTime date)
+        {
+            return DateTime.SpecifyKind(
+                date.Date.AddDays(1).AddTicks(-1),
+                DateTimeKind.Utc
+            );
         }
 
         private ApiResponse<FinancialSummaryDTO>? ValidateDateRange(DateTime fromDate, DateTime toDate)

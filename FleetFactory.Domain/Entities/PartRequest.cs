@@ -13,6 +13,9 @@ namespace FleetFactory.Domain.Entities
 
         public Guid? VehicleId { get; set; }
 
+        // Existing part link, only used when customer requests low-stock part
+        public Guid? PartId { get; set; }
+
         [Required, MaxLength(100)]
         public string PartName { get; set; } = null!;
 
@@ -27,5 +30,8 @@ namespace FleetFactory.Domain.Entities
 
         public CustomerProfile Customer { get; set; } = null!;
         public Vehicle? Vehicle { get; set; }
+
+        // Navigation property
+        public Part? Part { get; set; }
     }
 }

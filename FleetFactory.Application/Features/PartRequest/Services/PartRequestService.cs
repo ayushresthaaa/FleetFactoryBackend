@@ -11,9 +11,12 @@ namespace FleetFactory.Application.Features.PartRequests.Services
     public class PartRequestService(
         IPartRequestRepository _partRequestRepository,
         ICustomerProfileRepository _customerProfileRepository,
-        IEmailService _emailService
+        IEmailService _emailService,
+        IPartRepository _partRepository
     ) : IPartRequestService
     {
+        private const int RequestableStockThreshold = 10;
+
         public async Task<ApiResponse<PartRequestResponseDTO>> CreateMyRequestAsync(
             string userId,
             CreatePartRequestRequestDTO request)
@@ -23,7 +26,7 @@ namespace FleetFactory.Application.Features.PartRequests.Services
             if (customer == null)
                 return ApiResponse<PartRequestResponseDTO>.ErrorResponse("Customer profile not found");
 
-            if (string.IsNullOrWhiteSpace(request.PartName))
+            if (!request.PartId.HasValue && string.IsNullOrWhiteSpace(request.PartName))
                 return ApiResponse<PartRequestResponseDTO>.ErrorResponse("Part name is required");
 
             if (request.VehicleId.HasValue &&
@@ -33,11 +36,32 @@ namespace FleetFactory.Application.Features.PartRequests.Services
                     .ErrorResponse("Vehicle does not belong to this customer");
             }
 
+            Part? existingPart = null;
+
+            if (request.PartId.HasValue)
+            {
+                existingPart = await _partRepository.GetByIdAsync(request.PartId.Value);
+
+                if (existingPart == null)
+                    return ApiResponse<PartRequestResponseDTO>.ErrorResponse("Part not found");
+
+             if (existingPart.StockQty >= RequestableStockThreshold)
+            {
+                return ApiResponse<PartRequestResponseDTO>
+                    .ErrorResponse("This part is currently available and cannot be requested");
+            }
+            }
+
             var partRequest = new PartRequest
             {
                 CustomerId = customer.Id,
                 VehicleId = request.VehicleId,
-                PartName = request.PartName.Trim(),
+                PartId = request.PartId,
+
+                PartName = existingPart != null
+                    ? existingPart.Name
+                    : request.PartName!.Trim(),
+
                 Description = request.Description,
                 Status = PartRequestStatus.Pending,
                 CreatedAt = DateTimeHelper.UtcNow,
@@ -216,6 +240,7 @@ namespace FleetFactory.Application.Features.PartRequests.Services
                 CustomerName = request.Customer?.FullName ?? "",
                 VehicleId = request.VehicleId,
                 VehicleNumber = request.Vehicle?.VehicleNumber,
+                PartId = request.PartId,
                 PartName = request.PartName,
                 Description = request.Description,
                 Status = request.Status.ToString(),

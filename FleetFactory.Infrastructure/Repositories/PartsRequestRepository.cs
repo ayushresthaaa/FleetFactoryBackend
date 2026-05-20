@@ -17,6 +17,7 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Include(p => p.Customer)
                     .ThenInclude(c => c.User)
                 .Include(p => p.Vehicle)
+                .Include(p => p.Part)
                 .OrderByDescending(p => p.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -39,6 +40,7 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Include(p => p.Customer)
                     .ThenInclude(c => c.User)
                 .Include(p => p.Vehicle)
+                .Include(p => p.Part)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query))
@@ -50,7 +52,9 @@ namespace FleetFactory.Infrastructure.Repositories
                     (p.Description != null && p.Description.ToLower().Contains(search)) ||
                     p.Customer.FullName.ToLower().Contains(search) ||
                     (p.Vehicle != null &&
-                     p.Vehicle.VehicleNumber.ToLower().Contains(search))
+                     p.Vehicle.VehicleNumber.ToLower().Contains(search)) ||
+                    (p.Part != null &&
+                     p.Part.Name.ToLower().Contains(search))
                 );
             }
 
@@ -79,6 +83,7 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Include(p => p.Customer)
                     .ThenInclude(c => c.User)
                 .Include(p => p.Vehicle)
+                .Include(p => p.Part)
                 .Where(p => p.CustomerId == customerId)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
@@ -90,6 +95,7 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Include(p => p.Customer)
                     .ThenInclude(c => c.User)
                 .Include(p => p.Vehicle)
+                .Include(p => p.Part)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -101,6 +107,7 @@ namespace FleetFactory.Infrastructure.Repositories
                 .Include(p => p.Customer)
                     .ThenInclude(c => c.User)
                 .Include(p => p.Vehicle)
+                .Include(p => p.Part)
                 .FirstOrDefaultAsync(p =>
                     p.Id == requestId &&
                     p.CustomerId == customerId);
