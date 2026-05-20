@@ -10,5 +10,6 @@ namespace FleetFactory.Application.Interfaces.Services
         Task<ApiResponse<string>> ChangePasswordAsync(string userId, ChangePasswordRequestDTO request);
 
         Task<ApiResponse<string>> ChangeNameAsync(string userId, ChangeNameRequestDTO request);
+        Task<ApiResponse<MyAccountResponseDTO>> GetMyAccountAsync(string userId);
     }
 }

@@ -11,7 +11,7 @@ namespace FleetFactory.API.Controllers
     public class PartsController (IPartService _partService) : ControllerBase
     {
         [HttpGet]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff,Customer")]
         public async Task<IActionResult> GetAll(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)

@@ -66,5 +66,22 @@ namespace FleetFactory.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMyAccount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var result = await _accountService.GetMyAccountAsync(userId);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
 }

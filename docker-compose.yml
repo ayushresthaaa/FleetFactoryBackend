@@ -24,7 +24,7 @@ services:
       EmailSettings__Port: 587
       EmailSettings__Username: ayushresthaas@gmail.com
       EmailSettings__Password: "nmdv kokw wtaz taoo"
-
+    restart: always
   postgres:
     image: postgres:17
     container_name: fleetfactory_postgres

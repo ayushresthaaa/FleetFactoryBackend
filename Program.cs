@@ -158,9 +158,6 @@ app.MapGet("/health", () =>
     Results.Ok(new { status = "FleetFactory API is running" })
 );
 
-
-
-
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
@@ -172,5 +169,11 @@ using (var scope = app.Services.CreateScope())
         .GetRequiredService<RoleManager<IdentityRole>>();
 
     await RoleSeeder.SeedAsync(roleManager);
+
+    var userManager = scope.ServiceProvider
+        .GetRequiredService<UserManager<ApplicationUser>>();
+
+    await AdminSeeder.SeedAsync(userManager);
 }
+
 app.Run();

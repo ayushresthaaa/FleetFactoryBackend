@@ -133,5 +133,23 @@ namespace FleetFactory.Application.Features.Account.Services
             return ApiResponse<string>
                 .SuccessResponse("Name updated", "Name changed successfully");
         }
+
+        public async Task<ApiResponse<MyAccountResponseDTO>> GetMyAccountAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return ApiResponse<MyAccountResponseDTO>.ErrorResponse("User not found");
+
+            return ApiResponse<MyAccountResponseDTO>.SuccessResponse(
+                new MyAccountResponseDTO
+                {
+                    Email = user.Email ?? "",
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                },
+                "Account retrieved successfully"
+            );
+        }
     }
 }
